@@ -9,35 +9,45 @@
 #include <list>
 #include <vector>
 
-class linuxEthernet
-{
+class linuxEthernet {
 
 public:
     static std::list<std::string> scanNetworkDevices();
+
     static std::vector<std::shared_ptr<linuxEthernet>> createLinuxEthernetScanList() {
         std::vector<std::shared_ptr<linuxEthernet>> v;
-        for(auto elem: linuxEthernet::scanNetworkDevices()) {
+        for (auto elem: linuxEthernet::scanNetworkDevices()) {
             v.push_back(std::make_shared<linuxEthernet>(elem));
         }
         return v;
     }
 
 
+    linuxEthernet(std::string ethName = "eth0");
 
-    linuxEthernet(std::string ethName="eth0");
     uint64_t getBytesPerSecond();
+
     uint64_t getBytesSinceStartup();
+
     uint64_t getRXBytesPerSecond();
+
     uint64_t getRXBytesSinceStartup();
+
     uint64_t getTXBytesPerSecond();
+
     uint64_t getTXBytesSinceStartup();
+
     std::string getBytesPerSeceondString(uint64_t bytesPerSecond);
+
     std::string getBitsPerSeceondString(uint64_t bytesPerSecond);
+
     bool isDeviceUp();
+
     std::string getDeviceName();
 
 private:
     void initNetworkMonitor();
+
     uint64_t parseEthernetDevice();
 
     uint64_t m_totalTransceivedBytes = 0;
