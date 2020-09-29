@@ -1,11 +1,14 @@
 #include "linuxEthernet.hpp"
-#include <cstring>
+#include <string>
 #include <exception>
 #include <fstream>
 #include <iostream>
 #include <list>
 #include <sstream>
-#include "logfile.hpp"
+#include <stdexcept>
+#include <algorithm>
+#include <cstring>
+
 
 linuxEthernet::linuxEthernet(std::string ethName) : ethDev(ethName) {
     this->initNetworkMonitor();
@@ -41,7 +44,7 @@ uint64_t linuxEthernet::parseEthernetDevice() {
     try {
         ethernetFile.open("/proc/net/dev");
     } catch (std::ifstream::failure e) {
-        WARNING("Exception: /proc/net/dev");
+        throw std::runtime_error("Exception: /proc/net/dev");
         return 0;
     }
 
@@ -115,7 +118,7 @@ std::list<std::string> linuxEthernet::scanNetworkDevices() {
     try {
         ethernetFile.open("/proc/net/dev");
     } catch (std::ifstream::failure e) {
-        WARNING("Exception: /proc/net/dev");
+        throw std::runtime_error("Exception: /proc/net/dev");
         return netWorkDevices;
     }
 
@@ -127,9 +130,8 @@ std::list<std::string> linuxEthernet::scanNetworkDevices() {
         size_t pos = 0;
         if ((pos = line.find(":")) != std::string::npos) {
             std::string ifDev = line.substr(0, pos);
-            std::string::iterator end_pos = std::remove(ifDev.begin(), ifDev.end(), ' ');
-            ifDev.erase(end_pos, ifDev.end());
-            DEBUGMESSAGE("found networkdevice: %s ", ifDev.c_str());
+            ifDev.erase(std::remove(ifDev.begin(), ifDev.end(), ' '), ifDev.end());
+            throw std::runtime_error("found networkdevice: " + ifDev);
             netWorkDevices.push_back(ifDev);
         }
     }
@@ -139,7 +141,8 @@ std::list<std::string> linuxEthernet::scanNetworkDevices() {
 uint64_t linuxEthernet::getTXBytesPerSecond() {
     uint64_t oldBytesTransceived = this->m_totalTransmittedBytes;
     clock_t oldclock;
-    memcpy(&oldclock, &this->timeBefore_tx, sizeof(clock_t));
+    std::memcpy(&oldclock, &this->timeBefore_tx, sizeof(clock_t));
+
 
     this->parseEthernetDevice();
     this->m_totalTransmittedBytes = this->getTXBytesSinceStartup();
@@ -161,7 +164,7 @@ uint64_t linuxEthernet::getTXBytesPerSecond() {
 uint64_t linuxEthernet::getRXBytesPerSecond() {
     uint64_t oldBytesTransceived = this->m_totalReceivedBytes;
     clock_t oldclock;
-    memcpy(&oldclock, &this->timeBefore_rx, sizeof(clock_t));
+    std::memcpy(&oldclock, &this->timeBefore_rx, sizeof(clock_t));
 
     this->parseEthernetDevice();
     this->m_totalReceivedBytes = this->getRXBytesSinceStartup();
@@ -207,7 +210,7 @@ uint64_t linuxEthernet::getTXBytesSinceStartup() {
 uint64_t linuxEthernet::getBytesPerSecond() {
     uint64_t oldBytesTransceived = this->m_totalTransceivedBytes;
     clock_t oldclock;
-    memcpy(&oldclock, &this->timeBefore, sizeof(clock_t));
+    std::memcpy(&oldclock, &this->timeBefore, sizeof(clock_t));
 
     this->parseEthernetDevice();
     try {

@@ -24,8 +24,8 @@
 
 #include "jsonConfig.hpp"
 #include "webinterface.hpp"
-#include "cxxopts.hpp"
-#include <linuxmonitoring/linuxsysmonitor.hpp>
+#include <cxxopts.hpp>
+#include "linuxsysmonitor.hpp"
 #include <boost/signals2.hpp>
 #include "mqttClient/securemqttclient.hpp"
 #include <functional>

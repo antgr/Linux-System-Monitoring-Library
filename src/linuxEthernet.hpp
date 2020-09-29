@@ -7,6 +7,7 @@
 #include <time.h>
 #include <cstdint>
 #include <list>
+#include <vector>
 
 class linuxEthernet
 {

@@ -1,15 +1,15 @@
-#include <ctype.h>
-#include <stdlib.h>
+#include <cctype>
+#include <cstdlib>
 #include <unistd.h>
 #include <cstdio>
 #include <dirent.h>
 #include <fstream>
 #include <sys/types.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -21,9 +21,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
-#include "logfile.hpp"
-#include "linuxSys.hpp"
 #include <thread>
+
+#include "linuxSys.hpp"
 
 
 long linuxsystem::getCPUtemp(void) {
@@ -87,14 +87,11 @@ int linuxsystem::getProcIdByName(const char* procName)
 int linuxsystem::killProcessById(int pid,const char *procName)
 {
 	if(pid == -1) {
-		DEBUGMESSAGE("Nothing to Kill Process:%s with pid:%d",procName,pid);
+		throw std::runtime_error("Nothing to Kill, no Process " + std::string(procName) + " PID " + std::to_string(pid));
 	}
-	DEBUGMESSAGE("Kill Process:%s with pid:%d",procName,pid);
 	int ret = kill(pid,9);
 	if(ret == -1) {
-		CRITICALMESSAGE("killing %s was not successful!",procName);
-	} else {
-		INFOMESSAGE("%s killed!",procName);
+		throw std::runtime_error("killing " + std::string(procName) + " was not successful!");
 	}
 	return ret;
 }
@@ -128,7 +125,6 @@ bool linuxsystem::setAppAsDaemon()
 {
     pid_t pid;
     pid = fork();
-	CRITICALMESSAGE("PID1: %d", pid);
     if (pid < 0)  {
     	return false;
 		exit(EXIT_FAILURE);
@@ -146,7 +142,6 @@ bool linuxsystem::setAppAsDaemon()
     signal(SIGHUP, SIG_IGN);
 
     pid = fork();
-	CRITICALMESSAGE("PID1: %d", pid);
     if (pid < 0)
         exit(EXIT_FAILURE);
 
