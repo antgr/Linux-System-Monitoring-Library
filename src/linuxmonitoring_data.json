@@ -1,0 +1,71 @@
+{
+  "Linuxsystemmonitoring": {
+    "linuxethernet": [
+      {
+        "iFace": "eth0",
+        "BitsRXSecond": "undef",
+        "BytesRXSecond": "89Byte/s",
+        "BytesRXTotal": 92824691,
+        "BytesTXSecond": "22Byte/s",
+        "BytesTXTotal": 5783311275,
+        "BytesTotal": 5876135966,
+        "BytesTotalPerSecond": "97Byte/s"
+      }
+    ],
+    "MemoryUsage:": {
+      "MemoryUsage_KIB": 11195216,
+      "MemoryUsage_perc": 34.0,
+      "MemoryUsage_totalKIB": 32893064,
+      "MemoryUsage_of_process:": 349822
+    },
+    "CPU": {
+      "CPUUsage": 7.99,
+      "CPU_Type": "Intel I7",
+      "num_of_cores": 12,
+      "MultiCore": [
+        "CPU0:4.85%",
+        "CPU1:7.77%",
+        "CPU2:11.76%",
+        "CPU3:9.52%",
+        "CPU4:4.04%",
+        "CPU5:1.98%",
+        "CPU6:6.86%",
+        "CPU7:4.90%",
+        "CPU8:15.69%",
+        "CPU9:5.05%",
+        "CPU10:17.48%",
+        "CPU11:7.92%",
+        "CPU12:9.90%",
+        "CPU13:9.52%",
+        "CPU14:7.92%",
+        "CPU15:9.71%"
+      ],
+      "MultiUsage": [
+        4.85,
+        7.77,
+        11.76,
+        9.52,
+        4.04,
+        1.98,
+        6.86,
+        4.9,
+        15.69,
+        5.05,
+        17.48,
+        7.92,
+        9.9,
+        9.52,
+        7.92,
+        9.71
+      ]
+    },
+    "system": {
+      "SysUptime": 37008,
+      "SysUptime_days": 0,
+      "SysUptime_hours": 10,
+      "SysUptime_min": 16,
+      "SysUptime_sec": 48
+    }
+  },
+  "type": "system"
+}
