@@ -1,14 +1,13 @@
 #pragma once
 
 
-#include "linuxMemory.hpp"
-#include "linuxSys.hpp"
-#include "linuxEthernet.hpp"
-#include "linuxcpu.hpp"
+ #include "src/linux_memoryload.hpp"
+#include "src/linux_cpuload.hpp"
+#include "src/linux_networkload.hpp"
+#include "src/data/data_linuxmonitoring.hpp"
 #include <thread>
 #include <atomic>
 #include <json.hpp>
-#include "linuxmonitoringdatamodel/data_linuxmonitoring.hpp"
 #include <memory>
 #ifndef CROSSCOMPILE
 #include <boost/signals2.hpp>
@@ -32,7 +31,7 @@ public:
 #ifndef CROSSCOMPILE
     boost::signals2::signal<void(json)> dataReady;
     void setRunB(bool runB);
-    linuxsysmonitor(const chrono::milliseconds &interval);
+    linuxsysmonitor(const std::chrono::milliseconds &interval);
 #endif
     linuxsysmonitor();
     linuxmonitoring_data::DataLinuxmonitoring getlinuxSysMonitoringData();
@@ -48,10 +47,10 @@ private:
     std::atomic<bool> run_b = true;
 #endif
     linuxmonitoring_data::DataLinuxmonitoring linuxDataModel;
-    std::unique_ptr<linuxCpu> cpu;
+    std::unique_ptr<cpuLoad> cpu;
     std::unique_ptr<linuxsystem> syscalls;
-    std::unique_ptr<linuxMemory> sysMemory;
-    std::unique_ptr<linuxEthernet> sysEthernet;
+    std::unique_ptr<memoryLoad> sysMemory;
+    std::unique_ptr<networkLoad> sysEthernet;
     std::vector<std::shared_ptr<linuxEthernet>> sysEthernet_v;
 
 

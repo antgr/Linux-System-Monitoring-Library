@@ -5,10 +5,11 @@ a backend application or print it on a display.
 
 
 [Picture of LCD with load].
-
++ Link to repo -> 
++ Link to example
 
 [Screenshot of Grafana and Load].
-
++ Link to example
 
 
 ### Features:
@@ -121,10 +122,13 @@ therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) + th
 ## Todo:
 * CPU Usage per Process
 * example -> monitoring and creating graph with grafana
+* example -> avr lcd bridge
 * Testing: Catch2 tests
 * Data Export in JSON, BSON,MSGPack, XML
 * logging and average of 30min, 2h, 6h, 24h , 2d, 7d. 
 * Documentation
+* ethernetparser optimization 
+* memoryparser optimization
 
 # Get in Contact: 
 If there are any Bugs or Request for extensions or features, feel free
