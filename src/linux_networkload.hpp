@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <time.h>
+#include <ctime>
 #include <cstdint>
 #include <list>
 #include <vector>
@@ -16,7 +16,7 @@ public:
     static std::vector<std::shared_ptr<networkLoad>> createLinuxEthernetScanList() {
         std::vector<std::shared_ptr<networkLoad>> v;
         for (auto elem: networkLoad::scanNetworkDevices("/proc/net/dev")) {
-            v.push_back(std::make_shared<networkLoad>(elem));
+            v.push_back(std::make_shared<networkLoad>("/proc/net/dev",elem));
         }
         return v;
     }

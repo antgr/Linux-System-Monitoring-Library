@@ -188,6 +188,10 @@ void cpuLoad::initMultiCore() {
 
 std::string cpuLoad::getCPUName(std::string cpuNameFile) {
 
+    if(!this->cpuName.empty()) {
+        return this->cpuName;
+    }
+
     std::ifstream file;
     file.open(cpuNameFile);
 
@@ -200,7 +204,8 @@ std::string cpuLoad::getCPUName(std::string cpuNameFile) {
         if (line.find("model name") != std::string::npos) {
             size_t pos = line.find(":");
             if (pos != std::string::npos) {
-                return line.substr(pos, line.size());
+                this->cpuName = line.substr(pos, line.size());
+                return this->cpuName;
             }
         }
     }

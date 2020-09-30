@@ -8,7 +8,7 @@ class cpuLoad {
 
 public:
     explicit cpuLoad(std::string procFileName = "/proc/stat"):
-    procFile(procFileName) {};
+    procFile(procFileName), cpuName("") {};
     void initcpuUsage();
     double getCurrentCpuUsage();
     std::vector<double> getCurrentMultiCoreUsage();
@@ -17,7 +17,7 @@ public:
         return numOfCpus;
     }
 
-    static std::string getCPUName(std::string cpuNameFile = "/proc/cpuinfo");
+    std::string getCPUName(std::string cpuNameFile = "/proc/cpuinfo");
 
 private:
     uint64_t lastTotalUser = 0;
@@ -31,6 +31,7 @@ private:
     std::vector<uint64_t> vec_lastTotalIdle;
     uint32_t numOfCpus = 0;
     std::string procFile;
+    std::string cpuName;
 };
 
 

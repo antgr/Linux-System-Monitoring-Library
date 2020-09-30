@@ -27,3 +27,4 @@ include(src/CMakeLists.txt)
 include(tests/CMakeLists.txt)
 
 include(example/LinuxSystemMonitor/CMakeLists.txt)
+include(example/simplemonitor/CMakeLists.txt)

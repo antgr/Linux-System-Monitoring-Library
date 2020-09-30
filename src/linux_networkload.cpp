@@ -129,7 +129,7 @@ std::list<std::string> networkLoad::scanNetworkDevices(std::string ethernetDataF
         if ((pos = line.find(":")) != std::string::npos) {
             std::string ifDev = line.substr(0, pos);
             ifDev.erase(std::remove(ifDev.begin(), ifDev.end(), ' '), ifDev.end());
-            throw std::runtime_error("found networkdevice: " + ifDev);
+            //throw std::runtime_error("found networkdevice: " + ifDev);
             netWorkDevices.push_back(ifDev);
         }
     }

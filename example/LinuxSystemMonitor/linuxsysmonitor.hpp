@@ -4,7 +4,7 @@
  #include "src/linux_memoryload.hpp"
 #include "src/linux_cpuload.hpp"
 #include "src/linux_networkload.hpp"
-#include "src/data/data_linuxmonitoring.hpp"
+#include "data/data_linuxmonitoring.hpp"
 #include <thread>
 #include <atomic>
 #include <json.hpp>
