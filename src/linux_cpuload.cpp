@@ -1,12 +1,12 @@
-#include "linuxcpu.hpp"
+#include "linux_cpuload.hpp"
 #include <stdexcept>
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <cmath>
 
-void linuxCpu::initcpuUsage() {
-    FILE *file = fopen("/proc/stat", "r");
+void cpuLoad::initcpuUsage() {
+    FILE *file = fopen(this->procFile.c_str(), "r");
     auto retval = fscanf(file, "cpu %lu %lu %lu %lu", &lastTotalUser, &lastTotalUserLow,
                          &lastTotalSys, &lastTotalIdle);
     if (retval < 0) {
@@ -15,12 +15,12 @@ void linuxCpu::initcpuUsage() {
     fclose(file);
 }
 
-double linuxCpu::getCurrentCpuUsage() {
+double cpuLoad::getCurrentCpuUsage() {
     double percent;
     FILE *file;
     unsigned long long totalUser, totalUserLow, totalSys, totalIdle, total;
 
-    file = fopen("/proc/stat", "r");
+    file = fopen(this->procFile.c_str(), "r");
     auto retval = fscanf(file, "cpu %llu %llu %llu %llu", &totalUser, &totalUserLow,
                          &totalSys, &totalIdle);
     fclose(file);
@@ -49,14 +49,14 @@ double linuxCpu::getCurrentCpuUsage() {
     return percent;
 }
 
-std::vector<double> linuxCpu::getCurrentMultiCoreUsage() {
+std::vector<double> cpuLoad::getCurrentMultiCoreUsage() {
 
     std::vector<double> percents;
     std::ifstream file;
-    file.open("/proc/stat");
+    file.open(this->procFile);
 
     if (!file.is_open()) {
-        throw std::runtime_error("unable to open /proc/stat");
+        throw std::runtime_error("unable to open " + this->procFile);
         return std::vector<double>();
     }
 
@@ -74,7 +74,7 @@ std::vector<double> linuxCpu::getCurrentMultiCoreUsage() {
     uint32_t cnt = 0;
     while (std::getline(file, line)) {
         double percent = 0.0;
-        for (int i = cnt; i < this->numOfCpus; i++) {
+        for (uint32_t i = cnt; i < this->numOfCpus; i++) {
             cpu = "cpu";
             cpu += std::to_string(i);
 
@@ -127,12 +127,12 @@ std::vector<double> linuxCpu::getCurrentMultiCoreUsage() {
     return percents;
 }
 
-void linuxCpu::initMultiCore() {
+void cpuLoad::initMultiCore() {
     std::ifstream file;
-    file.open("/proc/stat");
+    file.open(this->procFile);
 
     if (!file.is_open()) {
-        throw std::runtime_error("unable to open /proc/stat");
+        throw std::runtime_error("unable to open " + this->procFile);
         return;
     }
     std::string line;
@@ -142,7 +142,6 @@ void linuxCpu::initMultiCore() {
         }
     }
     this->numOfCpus -= 1; // in the /proc/cat file there is a common cpu and the single cores cpu0 - cpuxx
-    throw std::runtime_error("Found " + std::to_string(this->numOfCpus) + " Cores");
 
     this->vec_lastTotalSys.resize(this->numOfCpus);
     this->vec_lastTotalUser.resize(this->numOfCpus);
@@ -154,7 +153,7 @@ void linuxCpu::initMultiCore() {
     file.clear();
     file.seekg(0, std::ios::beg);
     while (std::getline(file, line)) {
-        for (int i = cnt; i < this->numOfCpus; i++) {
+        for (uint32_t i = cnt; i < this->numOfCpus; i++) {
             cpu = "cpu";
             cpu += std::to_string(i);
 
@@ -187,13 +186,13 @@ void linuxCpu::initMultiCore() {
     file.close();
 }
 
-std::string linuxCpu::getCPUName() {
+std::string cpuLoad::getCPUName(std::string cpuNameFile) {
 
     std::ifstream file;
-    file.open("/proc/cpuinfo");
+    file.open(cpuNameFile);
 
     if (!file.is_open()) {
-        throw std::runtime_error("unable to open /proc/cpuinfo");
+        throw std::runtime_error("unable to open " +cpuNameFile);
         return std::string();
     }
     std::string line;

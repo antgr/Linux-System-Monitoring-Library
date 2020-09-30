@@ -1,53 +1,43 @@
-#include "linuxMemory.hpp"
+#include "linux_memoryload.hpp"
 #include <cmath>
-#include <cstring>
 #include <fstream>
 #include <iostream>
 
-
-uint64_t linuxMemory::getTotalMemoryInKB() {
-    uint64_t totalMem = 0;
+bool memoryLoad::parseMemoryFile() {
     std::ifstream memoryFile;
-    memoryFile.open("/proc/meminfo");
+    memoryFile.open(this->memInfoFile);
 
     if (!memoryFile.is_open()) {
-        return 0;
+        return false;
     }
 
     std::string line;
     while (std::getline(memoryFile, line)) {
-        sscanf(line.c_str(), "MemTotal: %lu", static_cast<uint64_t *>(&totalMem));
+        sscanf(line.c_str(), "MemTotal: %lu", static_cast<uint64_t *>(&this->totalMemoryInKB));
+        sscanf(line.c_str(), "MemAvailable: %lu", static_cast<uint64_t *>(&this->currentMemoryUsageInKB));
     }
     memoryFile.close();
-    return totalMem;
+    return true;
 }
 
-uint64_t linuxMemory::getCurrentMemUsageInKB() {
-    uint64_t MemFree = 0;
-    std::ifstream memoryFile;
-    memoryFile.open("/proc/meminfo");
-
-    if (!memoryFile.is_open()) {
-        return 0;
-    }
-
-    std::string line;
-    while (std::getline(memoryFile, line)) {
-        sscanf(line.c_str(), "MemAvailable: %lu", static_cast<uint64_t *>(&MemFree));
-    }
-    memoryFile.close();
-    return this->getTotalMemoryInKB() - MemFree;
+uint64_t memoryLoad::getTotalMemoryInKB() {
+    return this->totalMemoryInKB;
 }
 
-float linuxMemory::getCurrentMemUsageInPercent() {
+uint64_t memoryLoad::getCurrentMemUsageInKB() {
+    return this->getTotalMemoryInKB() - this->currentMemoryUsageInKB;
+}
+
+float memoryLoad::getCurrentMemUsageInPercent() {
+    this->parseMemoryFile();
     uint64_t memavail = this->getCurrentMemUsageInKB();
     return round((((memavail * 100 / this->getTotalMemoryInKB()))) * 100) / 100;
 }
 
-uint64_t linuxMemory::getMemoryUsageByThisProcess() {
+uint64_t memoryLoad::getMemoryUsageByThisProcess() {
     uint64_t MemFree = 0;
     std::ifstream memoryFile;
-    memoryFile.open("/proc/self/status");
+    memoryFile.open(this->memInfoOfProcessFile);
     std::string line;
     while (std::getline(memoryFile, line)) {
         sscanf(line.c_str(), "VmSize: %lu", static_cast<uint64_t *>(&MemFree));
@@ -64,11 +54,11 @@ uint64_t linuxMemory::getMemoryUsageByThisProcess() {
  * VmData, VmStk, VmExe: Size of data, stack, and text segments.
  */
 
-uint64_t linuxMemory::getMemoryUsedByProcess(int pid) {
+uint64_t memoryLoad::getMemoryUsedByProcess(int pid) {
 
     uint64_t MemFree = 0;
     std::ifstream memoryFile;
-    memoryFile.open("/proc/self/" + std::to_string(pid));
+    memoryFile.open(this->memInfoOfProcessPrefixFile + std::to_string(pid));
     std::string line;
     while (std::getline(memoryFile, line)) {
         sscanf(line.c_str(), "VmSize: %lu", static_cast<uint64_t *>(&MemFree));

@@ -1,4 +1,3 @@
-#include <cctype>
 #include <cstdlib>
 #include <unistd.h>
 #include <cstdio>
@@ -6,27 +5,17 @@
 #include <fstream>
 #include <sys/types.h>
 #include <csignal>
-#include <cstdio>
-#include <cstdlib>
-#include <unistd.h>
 #include <cstring>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h>
-#include <pthread.h>
-#include <getopt.h>
 #include <sys/statvfs.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
 #include <thread>
 
-#include "linuxSys.hpp"
+#include "linux_systemutil.hpp"
 
 
-long linuxsystem::getCPUtemp(void) {
+long linuxUtil::getCPUtemp(void) {
     FILE *fp;
     char buffer[4000];
     size_t bytes_read;
@@ -44,35 +33,28 @@ long linuxsystem::getCPUtemp(void) {
     return (temp);
 }
 
-int linuxsystem::getProcIdByName(const char *procName) {
+int linuxUtil::getProcIdByName(std::string procName) {
     int pid = -1;
-    // Open the /proc directory
     DIR *dp = opendir("/proc");
-    if (dp != NULL) {
-        // Enumerate all entries in directory until process found
+    if (dp != nullptr) {
         struct dirent *dirp;
         while (pid < 0 && (dirp = readdir(dp))) {
-            // Skip non-numeric entries
             int id = atoi(dirp->d_name);
             if (id > 0) {
-                // Read contents of virtual /proc/{pid}/cmdline file
-                string cmdPath{"/proc/"};
+                std::string cmdPath{"/proc/"};
                 cmdPath.append(dirp->d_name);
                 cmdPath.append("/cmdline");
-                ifstream cmdFile(cmdPath.c_str());
-                string cmdLine;
+                std::ifstream cmdFile(cmdPath.c_str());
+                std::string cmdLine;
                 getline(cmdFile, cmdLine);
                 if (!cmdLine.empty()) {
-                    // Keep first cmdline item which contains the program path
                     size_t pos = cmdLine.find('\0');
-                    if (pos != string::npos)
+                    if (pos != std::string::npos)
                         cmdLine = cmdLine.substr(0, pos);
-                    // Keep program name only, removing the path
                     pos = cmdLine.rfind('/');
-                    if (pos != string::npos)
+                    if (pos != std::string::npos)
                         cmdLine = cmdLine.substr(pos + 1);
-                    // Compare against requested process name
-                    if (strcmp(procName, cmdLine.c_str()) == 0) {
+                    if (strcmp(procName.c_str(), cmdLine.c_str()) == 0) {
                         pid = id;
                     }
                 }
@@ -83,19 +65,19 @@ int linuxsystem::getProcIdByName(const char *procName) {
     return pid;
 }
 
-int linuxsystem::killProcessById(int pid, const char *procName) {
+int linuxUtil::killProcessById(int pid, std::string procName) {
     if (pid == -1) {
         throw std::runtime_error(
-                "Nothing to Kill, no Process " + std::string(procName) + " PID " + std::to_string(pid));
+                "Nothing to Kill, no Process " + procName + " PID " + std::to_string(pid));
     }
     int ret = kill(pid, 9);
     if (ret == -1) {
-        throw std::runtime_error("killing " + std::string(procName) + " was not successful!");
+        throw std::runtime_error("killing " + procName + " was not successful!");
     }
     return ret;
 }
 
-uint64_t linuxsystem::getSysUpTime() {
+uint64_t linuxUtil::getSysUpTime() {
     ///proc/uptime
     /// 325679.29 320697.33
     std::ifstream upTimeFile;
@@ -116,7 +98,7 @@ uint64_t linuxsystem::getSysUpTime() {
 }
 
 
-bool linuxsystem::setAppAsDaemon() {
+bool linuxUtil::setAppAsDaemon() {
     pid_t pid;
     pid = fork();
     if (pid < 0) {
@@ -154,10 +136,10 @@ bool linuxsystem::setAppAsDaemon() {
     return true;
 }
 
-long linuxsystem::getFreeDiskSpace(const char *absoluteFilePath) {
+long linuxUtil::getFreeDiskSpace(std::string absoluteFilePath) {
     struct statvfs buf;
 
-    if (!statvfs(absoluteFilePath, &buf)) {
+    if (!statvfs(absoluteFilePath.c_str(), &buf)) {
         unsigned long blksize, blocks, freeblks, disk_size, used, free;
         printf("blksize :  %ld\n", buf.f_bsize);
         printf("blocks :  %ld\n", buf.f_blocks);
@@ -171,7 +153,7 @@ long linuxsystem::getFreeDiskSpace(const char *absoluteFilePath) {
         free = freeblks * blksize;
         used = disk_size - free;
 
-        printf("disk %s disksize: %ld free %ld used %ld\n", absoluteFilePath, disk_size, free, used);
+        printf("disk %s disksize: %ld free %ld used %ld\n", absoluteFilePath.c_str(), disk_size, free, used);
         return free;
     } else {
         return -1;
@@ -179,7 +161,7 @@ long linuxsystem::getFreeDiskSpace(const char *absoluteFilePath) {
     return -1;
 }
 
-long long linuxsystem::userAvailableFreeSpace() {
+long long linuxUtil::userAvailableFreeSpace() {
     struct statvfs stat;
     struct passwd *pw = getpwuid(getuid());
     if (NULL != pw && 0 == statvfs(pw->pw_dir, &stat)) {
@@ -190,7 +172,7 @@ long long linuxsystem::userAvailableFreeSpace() {
     return 0ULL;
 }
 
-std::string linuxsystem::getOSVersion_Signature(void) {
+std::string linuxUtil::getOSVersion_Signature(void) {
     std::ifstream versionFile;
     versionFile.open("/proc/version_signature");
 
@@ -204,7 +186,7 @@ std::string linuxsystem::getOSVersion_Signature(void) {
     return line;
 }
 
-std::string linuxsystem::getOsVersionString(void) {
+std::string linuxUtil::getOsVersionString(void) {
     std::ifstream versionFile;
     versionFile.open("/proc/version");
 
@@ -218,7 +200,7 @@ std::string linuxsystem::getOsVersionString(void) {
     return line;
 }
 
-bool linuxsystem::isDeviceOnline(std::string address) {
+bool linuxUtil::isDeviceOnline(std::string address) {
     const std::string processPrefix = {"ping -c 1 -w 1 "};
     const std::string processPostfix = {" 2>&1"};
     auto fd = popen((processPrefix + address + processPostfix).c_str(), "r");
@@ -243,7 +225,7 @@ bool linuxsystem::isDeviceOnline(std::string address) {
     return false;
 }
 
-uint32_t linuxsystem::getNumOfThreadsByThisProcess() {
+uint32_t linuxUtil::getNumOfThreadsByThisProcess() {
     uint32_t Threads = 0;
     std::ifstream memoryFile;
     memoryFile.open("/proc/self/status");
@@ -254,7 +236,7 @@ uint32_t linuxsystem::getNumOfThreadsByThisProcess() {
     return Threads;
 }
 
-uint32_t linuxsystem::getNumOfThreadsByPID(int Pid) {
+uint32_t linuxUtil::getNumOfThreadsByPID(int Pid) {
     uint32_t Threads = 0;
     std::ifstream memoryFile;
     memoryFile.open("/proc/self/" + std::to_string(Pid));

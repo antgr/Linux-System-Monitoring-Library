@@ -4,22 +4,20 @@
 #include <vector>
 #include <string>
 
-class linuxCpu {
+class cpuLoad {
 
 public:
+    explicit cpuLoad(std::string procFileName = "/proc/stat"):
+    procFile(procFileName) {};
     void initcpuUsage();
-
     double getCurrentCpuUsage();
-
     std::vector<double> getCurrentMultiCoreUsage();
-
     void initMultiCore();
-
     uint32_t getCores() {
         return numOfCpus;
     }
 
-    static std::string getCPUName();
+    static std::string getCPUName(std::string cpuNameFile = "/proc/cpuinfo");
 
 private:
     uint64_t lastTotalUser = 0;
@@ -32,6 +30,7 @@ private:
     std::vector<uint64_t> vec_lastTotalSys;
     std::vector<uint64_t> vec_lastTotalIdle;
     uint32_t numOfCpus = 0;
+    std::string procFile;
 };
 
 
