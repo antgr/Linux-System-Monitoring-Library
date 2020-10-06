@@ -63,7 +63,6 @@ std::vector<double> cpuLoad::getCurrentMultiCoreUsage() {
     std::string cpu = "cpu";
     std::string line;
 
-
     if (this->vec_lastTotalUser.size() == 0 ||
         this->vec_lastTotalUserLow.size() == 0 ||
         this->vec_lastTotalIdle.size() == 0 ||
@@ -78,18 +77,19 @@ std::vector<double> cpuLoad::getCurrentMultiCoreUsage() {
             cpu = "cpu";
             cpu += std::to_string(i);
 
-            unsigned long totalUser = 0,
+            uint64_t totalUser = 0,
                     totalUserLow = 0,
                     totalSys = 0,
                     totalIdle = 0;
             if (line.find(cpu) != std::string::npos) {
                 cpu += " %lu %lu %lu %lu";
 
-                auto r = sscanf(line.c_str(), cpu.c_str(),
-                                static_cast<unsigned long *>(&totalUser),
-                                static_cast<unsigned long *>(&totalUserLow),
-                                static_cast<unsigned long *>(&totalSys),
-                                static_cast<unsigned long *>(&totalIdle));
+                auto r = std::sscanf(line.c_str(), cpu.c_str(),
+                                &totalUser,
+                                &totalUserLow,
+                                &totalSys,
+                                &totalIdle);
+
                 if (r == -1) {
                     throw std::runtime_error("fscanf of file failed init multicpu");
                     break;
@@ -157,15 +157,15 @@ void cpuLoad::initMultiCore() {
             cpu = "cpu";
             cpu += std::to_string(i);
 
-            unsigned long totalUser, totalUserLow, totalSys, totalIdle;
+            uint64_t totalUser, totalUserLow, totalSys, totalIdle;
 
             if (line.find(cpu) != std::string::npos) {
                 cpu += " %lu %lu %lu %lu";
-                auto r = sscanf(line.c_str(), cpu.c_str(),
-                                static_cast<unsigned long *>(&totalUser),
-                                static_cast<unsigned long *>(&totalUserLow),
-                                static_cast<unsigned long *>(&totalSys),
-                                static_cast<unsigned long *>(&totalIdle));
+                auto r = std::sscanf(line.c_str(), cpu.c_str(),
+                                &totalUser,
+                                &totalUserLow,
+                                &totalSys,
+                                &totalIdle);
                 if (r == -1) {
                     throw std::runtime_error("fscanf of file failed init multicpu");
                     break;

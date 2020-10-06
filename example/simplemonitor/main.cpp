@@ -6,9 +6,9 @@
 #include <csignal>
 #include <memory>
 #include <atomic>
-#include "src/linux_memoryload.hpp"
-#include "src/linux_cpuload.hpp"
-#include "src/linux_networkload.hpp"
+#include "lib/linux_memoryload.hpp"
+#include "lib/linux_cpuload.hpp"
+#include "lib/linux_networkload.hpp"
 #include <thread>
 
 std::atomic_bool run;

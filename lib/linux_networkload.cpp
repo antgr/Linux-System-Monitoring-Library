@@ -75,24 +75,24 @@ uint64_t networkLoad::parseEthernetDevice() {
     std::map<std::string, std::string>::iterator it;
     it = this->networkstatMap.find(std::string("IF"));
     if (it == this->networkstatMap.end()) {
-        this->networkstatMap.insert(std::pair<std::string, std::string>(std::string("IF"), std::string(this->ethDev)));
+        this->networkstatMap.insert(std::pair<std::string, std::string>(std::string("IF"), this->ethDev));
     }
     while (std::getline(ethernetFile, line)) {
         std::string str_line(line);
         std::list<std::string>::iterator lit = identifiers.begin();
         if ((str_line.find(this->networkstatMap["IF"])) != std::string::npos) {
-            std::string line;
+            std::string line_;
             std::istringstream ss(str_line);
             this->isDeviceAvailable = true;
-            while (std::getline(ss, line, ' ')) {
+            while (std::getline(ss, line_, ' ')) {
                 try {
-                    uint64_t parsedULL = std::stoull(line, nullptr, 10);
+                    uint64_t parsedULL = std::stoull(line_, nullptr, 10);
                     //qInfo() << parsedULL;
                     if (lit != identifiers.end()) {
-                        it = networkstatMap.find(std::string(*lit));
+                        it = networkstatMap.find(*lit);
                         if (it == networkstatMap.end()) {
-                            networkstatMap.insert(std::pair<std::string, std::string>(std::string(*lit), std::string(
-                                    std::to_string(parsedULL))));
+                            networkstatMap.insert(std::pair<std::string, std::string>(*lit,
+                                    std::to_string(parsedULL)));
                         } else {
                             it->second = std::to_string(parsedULL);
                         }

@@ -91,7 +91,7 @@ uint64_t linuxUtil::getSysUpTime() {
     uint64_t SysUptime = 0;
     std::string line;
     while (std::getline(upTimeFile, line)) {
-        sscanf(line.c_str(), "%lu %lu", static_cast<uint64_t *>(&SysUptime), static_cast<uint64_t *>(&beforeBootTime));
+        sscanf(line.c_str(), "%lu %lu", &SysUptime, &beforeBootTime);
     }
     upTimeFile.close();
     return SysUptime;
@@ -103,7 +103,6 @@ bool linuxUtil::setAppAsDaemon() {
     pid = fork();
     if (pid < 0) {
         return false;
-        exit(EXIT_FAILURE);
     }
 
 
@@ -136,11 +135,11 @@ bool linuxUtil::setAppAsDaemon() {
     return true;
 }
 
-long linuxUtil::getFreeDiskSpace(std::string absoluteFilePath) {
+uint64_t linuxUtil::getFreeDiskSpace(std::string absoluteFilePath) {
     struct statvfs buf;
 
     if (!statvfs(absoluteFilePath.c_str(), &buf)) {
-        unsigned long blksize, blocks, freeblks, disk_size, used, free;
+        uint64_t blksize, blocks, freeblks, disk_size, used, free;
         printf("blksize :  %ld\n", buf.f_bsize);
         printf("blocks :  %ld\n", buf.f_blocks);
         printf("bfree :  %ld\n", buf.f_bfree);
@@ -153,20 +152,20 @@ long linuxUtil::getFreeDiskSpace(std::string absoluteFilePath) {
         free = freeblks * blksize;
         used = disk_size - free;
 
-        printf("disk %s disksize: %ld free %ld used %ld\n", absoluteFilePath.c_str(), disk_size, free, used);
+        printf("disk %s disksize: %lu free %lu used %lu\n", absoluteFilePath.c_str(), disk_size, free, used);
         return free;
     } else {
-        return -1;
+        return 0;
     }
-    return -1;
+    return 0;
 }
 
-long long linuxUtil::userAvailableFreeSpace() {
+uint64_t linuxUtil::userAvailableFreeSpace() {
     struct statvfs stat;
     struct passwd *pw = getpwuid(getuid());
-    if (NULL != pw && 0 == statvfs(pw->pw_dir, &stat)) {
+    if (nullptr != pw && 0 == statvfs(pw->pw_dir, &stat)) {
         printf("path %s\n", pw->pw_dir);
-        long long freeBytes = (uint64_t) stat.f_bavail * stat.f_frsize;
+        uint64_t freeBytes = stat.f_bavail * stat.f_frsize;
         return freeBytes;
     }
     return 0ULL;
@@ -231,7 +230,7 @@ uint32_t linuxUtil::getNumOfThreadsByThisProcess() {
     memoryFile.open("/proc/self/status");
     std::string line;
     while (std::getline(memoryFile, line)) {
-        sscanf(line.c_str(), "Threads: %u", static_cast<uint32_t *>(&Threads));
+        sscanf(line.c_str(), "Threads: %u", &Threads);
     }
     return Threads;
 }
@@ -242,7 +241,7 @@ uint32_t linuxUtil::getNumOfThreadsByPID(int Pid) {
     memoryFile.open("/proc/self/" + std::to_string(Pid));
     std::string line;
     while (std::getline(memoryFile, line)) {
-        sscanf(line.c_str(), "Threads: %u", static_cast<uint32_t *>(&Threads));
+        sscanf(line.c_str(), "Threads: %u", &Threads);
     }
     return Threads;
 }

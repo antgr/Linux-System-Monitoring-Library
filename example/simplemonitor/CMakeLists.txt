@@ -9,6 +9,6 @@ add_executable(simple_linuxsystemMonitor
         ${CMAKE_CURRENT_LIST_DIR}/main.cpp
         )
 
-
+target_compile_options(simple_linuxsystemMonitor PRIVATE ${COMPILER_SETTINGS})
 target_link_libraries(simple_linuxsystemMonitor linuxmonitoring)
 

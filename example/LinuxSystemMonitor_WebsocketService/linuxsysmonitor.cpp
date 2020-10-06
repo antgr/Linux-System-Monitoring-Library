@@ -1,27 +1,24 @@
 #include "linuxsysmonitor.hpp"
 #include <iostream>
-#include "jsonConfig.hpp"
-#include "logfile.hpp"
 
 linuxsysmonitor::linuxsysmonitor() {
     init();
 }
-#ifndef CROSSCOMPILE
-linuxsysmonitor::linuxsysmonitor(const chrono::milliseconds &interval) : interval(interval) {
+
+linuxsysmonitor::linuxsysmonitor(const std::chrono::milliseconds &interval) : interval(interval) {
     init();
-    t = new thread(&linuxsysmonitor::run,this);
+    t = new std::thread(&linuxsysmonitor::run,this);
     t->detach();
 }
 
 void linuxsysmonitor::run() {
 
-    CLOGINFO() << "start linuxsysmonitoring thread";
+    std::cout << "start linuxsysmonitoring thread" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(3));
     while (run_b) {
         json sysvalues;
         this->getlinuxSysMonitoringData();
         to_json(sysvalues, this->linuxDataModel);
-        this->dataReady(sysvalues);
         std::this_thread::sleep_for(this->interval);
     }
 
@@ -30,17 +27,15 @@ void linuxsysmonitor::run() {
 void linuxsysmonitor::setRunB(bool runB) {
     run_b = runB;
 }
-#endif
 
 
 void linuxsysmonitor::init() {
-    cpu = std::make_unique<linuxCpu>();
-    syscalls = std::make_unique<linuxsystem>();
-    sysMemory = std::make_unique<linuxMemory>();
-    sysEthernet = std::make_unique<linuxEthernet>(JSONConfig::getconfig().get_system_monitoring().get_ethernet());
+    cpu = std::make_unique<cpuLoad>();
+    syscalls = std::make_unique<linuxUtil>();
+    sysMemory = std::make_unique<memoryLoad>();
     cpu->initMultiCore();
     cpu->initcpuUsage();
-    this->sysEthernet_v = linuxEthernet::createLinuxEthernetScanList();
+    this->sysEthernet_v = networkLoad::createLinuxEthernetScanList();
 }
 
 
@@ -53,7 +48,7 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
     std::string multicore;
     int cnt = 0;
     char buf[40];
-    std::vector<string> cpuUsage;
+    std::vector<std::string> cpuUsage;
     for(auto & elem: cpuload ) {
         multicore = "CPU" + std::to_string(cnt++) + ":";
         std::snprintf(buf,40,"%.2f",round(elem*100)/100);
@@ -65,7 +60,7 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
 
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_cpu().set_multi_core(cpuUsage);
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_cpu().set_num_of_cores(cpu->getCores());
-    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_cpu().set_cpu_type(linuxCpu::getCPUName());
+    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_cpu().set_cpu_type(cpu->getCPUName());
 
 
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_linuxethernet().clear();

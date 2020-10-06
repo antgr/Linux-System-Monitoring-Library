@@ -13,8 +13,8 @@ bool memoryLoad::parseMemoryFile() {
 
     std::string line;
     while (std::getline(memoryFile, line)) {
-        sscanf(line.c_str(), "MemTotal: %lu", static_cast<uint64_t *>(&this->totalMemoryInKB));
-        sscanf(line.c_str(), "MemAvailable: %lu", static_cast<uint64_t *>(&this->currentMemoryUsageInKB));
+        sscanf(line.c_str(), "MemTotal: %lu", &this->totalMemoryInKB);
+        sscanf(line.c_str(), "MemAvailable: %lu", &this->currentMemoryUsageInKB);
     }
     memoryFile.close();
     return true;
@@ -40,7 +40,7 @@ uint64_t memoryLoad::getMemoryUsageByThisProcess() {
     memoryFile.open(this->memInfoOfProcessFile);
     std::string line;
     while (std::getline(memoryFile, line)) {
-        sscanf(line.c_str(), "VmSize: %lu", static_cast<uint64_t *>(&MemFree));
+        sscanf(line.c_str(), "VmSize: %lu", &MemFree);
     }
     return MemFree;
 }
@@ -61,7 +61,7 @@ uint64_t memoryLoad::getMemoryUsedByProcess(int pid) {
     memoryFile.open(this->memInfoOfProcessPrefixFile + std::to_string(pid));
     std::string line;
     while (std::getline(memoryFile, line)) {
-        sscanf(line.c_str(), "VmSize: %lu", static_cast<uint64_t *>(&MemFree));
+        sscanf(line.c_str(), "VmSize: %lu", &MemFree);
     }
     return MemFree;
 }

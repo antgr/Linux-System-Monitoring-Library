@@ -20,51 +20,37 @@
 #include <thread>
 #include <atomic>
 #include <chrono>
-#include "logfile.hpp"
 
-#include "jsonConfig.hpp"
-#include "webinterface.hpp"
 #include <cxxopts.hpp>
 #include "linuxsysmonitor.hpp"
-#include <boost/signals2.hpp>
-#include "mqttClient/securemqttclient.hpp"
 #include <functional>
 
 #include <App.h>
 
 using json = nlohmann::json;
-using namespace boost::signals2;
 
 
 class PerSocketData {
 public:
 
     void shutdown() {
-        this->con.disconnect();
+
     }
 
     void
     setConnectedWebsocket(uWS::WebSocket<true, true> *socket, std::shared_ptr<linuxsysmonitor> linuxsysmonitorinst) {
-        this->connectedWS = socket;
-        this->linuxMon = linuxsysmonitorinst;
-
-        this->con = this->linuxMon->dataReady.connect([this](json values) {
-            if (!values.empty()) {
-                CLOGINFO() << "send to ws " << this->connectedWS;
-                this->connectedWS->send(values.dump(), uWS::OpCode::TEXT);
-
-            }
-        });
-
+         this->connectedWS = socket;
+         this->linuxMon = linuxsysmonitorinst;
+         std::cout << "send to ws " << this->connectedWS << std::endl;
+         this->connectedWS->send("send json dump", uWS::OpCode::TEXT);
     }
 
 private:
     uWS::WebSocket<true, true> *connectedWS;
     std::shared_ptr<linuxsysmonitor> linuxMon;
-    connection con;
 };
 
-class LinuxMQTTWebSocket {
+class LinuxMonitorWebSocketBridge {
 
 private:
     uint16_t portToListen;
@@ -75,8 +61,6 @@ private:
     std::vector<uWS::AsyncSocket<true>> connectedSockets;
     uWS::TemplatedApp<true> inst;
     std::shared_ptr<linuxsysmonitor> linuxMon;
-    std::unique_ptr<securemqttclient> securemqttclient_p;
-    uint32_t cnt;
 
 
     void startServer(std::string route) {
@@ -91,40 +75,43 @@ private:
                 .idleTimeout = 100,
                 .maxBackpressure = 1 * 1024 * 1024,
                 .open = [&](auto *ws) {
-                    CLOGINFO() << "open ws adr: " << ws;
+                    std::cout << "open ws adr: " << ws << std::endl;
                     static_cast<PerSocketData *>(ws->getUserData())->setConnectedWebsocket(ws, this->linuxMon);
                     //connectedSockets.push_back(*ws);
 
                 },
                 .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
-                    CLOGINFO() << "message ws adr: " << ws;
+                    std::cout << "message ws adr: " << ws << std::endl;
                     ws->send(message, opCode, true);
                 },
                 .drain = [](auto *ws) {
-                    CLOGINFO() << "drain ws adr: " << ws;
+                    std::cout << "drain ws adr: " << ws << std::endl;
                 },
                 .ping = [](auto *ws) {
-                    CLOGINFO() << "ping ws adr: " << ws;
+                    std::cout << "ping ws adr: " << ws << std::endl;
                 },
                 .pong = [](auto *ws) {
-                    CLOGINFO() << "pong ws adr: " << ws;
+                    std::cout << "pong ws adr: " << ws << std::endl;
                 },
                 .close = [](auto *ws, int code, std::string_view message) {
-                    CLOGINFO() << "close ws adr:" << ws;
+                    std::cout << "close ws adr:" << ws << std::endl;
                     static_cast<PerSocketData *>(ws->getUserData())->shutdown();
                 }
         }).listen(this->portToListen, [&](us_listen_socket_t *token) {
             if (token) {
-                CLOGINFO() << "WebsocketServer Listening on port " << this->portToListen << " with route " << route;
+                std::cout   << "WebsocketServer Listening on port "
+                            << this->portToListen
+                            << " with route "
+                            << route << std::endl;
             }
         }).run();
-        CLOGINFO() << "WebsocketServer undefined behavior!";
+        std::cerr << "WebsocketServer undefined behavior!"<< std::endl;
     }
 
 
 public:
 
-    explicit LinuxMQTTWebSocket(std::string privateKeyPath,
+    explicit LinuxMonitorWebSocketBridge(std::string privateKeyPath,
                                 std::string publicCertPath,
                                 std::string passphrase = "",
                                 uint16_t portNum = 4002) {
@@ -132,28 +119,10 @@ public:
         this->publicCerts = publicCertPath;
         this->privateKey = privateKeyPath;
         this->passPhrase = passphrase;
-        cnt = 0;
         linuxMon = std::make_shared<linuxsysmonitor>(std::chrono::milliseconds(1000));
-        securemqttclient_p = std::make_unique<securemqttclient>(JSONConfig::getconfig().get_mqttbroker().get_mqtt_id());
     }
 
-    void runServer(std::string route, bool detach = false, std::string mqttTopic = "/linuxMonitor") {
-
-        auto fut = securemqttclient_p->connectToBroker();
-        fut.wait_for(std::chrono::milliseconds(3000));
-
-        linuxMon->dataReady.connect([=](json values) {
-            if (!values.empty()) {
-                this->securemqttclient_p->publish(
-                        mqtt::make_message(mqttTopic.c_str(),
-                                           values.dump()));
-                if (!(cnt++ % 7)) {
-                    CLOGINFO() << values.dump();
-                }
-            }
-        });
-
-
+    void runServer(std::string route, bool detach = false) {
         spawnThread = std::make_unique<std::thread>([&]() { this->startServer(route); });
         if (detach) {
             spawnThread->detach();
@@ -165,7 +134,7 @@ public:
 };
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char* argv[]) {
 
     cxxopts::Options options("BME680 Monitoring Testing",
                              "generates sensor values and tests secure webinterface and mqtt pushing");
@@ -175,34 +144,13 @@ int main(int argc, char *argv[]) {
     auto result = options.parse(argc, argv);
 
 
-    if (result["debug"].as<bool>()) {
-        logging::initLogging(vrlvl_debug, false);
-    } else {
-        logging::initLogging(vrlvl_info, false);
-    }
-    JSONConfig(result["json"].as<std::string>());
-
-    if (JSONConfig::getconfig().get_misc().get_start_as_daemon()) {
-        linuxsystem::setAppAsDaemon();
-    }
-
-    verbositylevels verbositylvl = vrlvl_debug;
-    if (JSONConfig::getconfig().get_logging().get_verbositylevel() == "Debug") {
-        verbositylvl = verbositylevels::vrlvl_debug;
-    } else if (JSONConfig::getconfig().get_logging().get_verbositylevel() == "Info") {
-        verbositylvl = verbositylevels::vrlvl_info;
-    } else if (JSONConfig::getconfig().get_logging().get_verbositylevel() == "Warning") {
-        verbositylvl = verbositylevels::vrlvl_warning;
-    } else {
-        verbositylvl = vrlvl_debug;
-    }
-    logging::setVerbosityLevel(verbositylvl);
-
-    auto mqttWebsocketLinuxMonitor = std::make_unique<LinuxMQTTWebSocket>(
-            JSONConfig::getconfig().get_http_server().get_private_key(),
-            JSONConfig::getconfig().get_http_server().get_public_certs()
+    auto websocketLinuxMonitor = std::make_unique<LinuxMonitorWebSocketBridge>(
+            std::string("/private/key.pem"),
+            std::string("/public/cert"),
+            "",
+            4002
     );
-    mqttWebsocketLinuxMonitor->runServer("/linuxmonitor", false,"/linuxMonitor");
+    websocketLinuxMonitor->runServer("/linuxmonitor", false);
     return 0;
 }
 

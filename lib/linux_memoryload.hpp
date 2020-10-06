@@ -4,10 +4,10 @@
 
 class memoryLoad {
 public:
-    explicit memoryLoad(std::string memInfoFile = "/proc/meminfo",
+    explicit memoryLoad(std::string memInfo = "/proc/meminfo",
                         std::string memInfoOfProcess = "/proc/self/status",
                         std::string memInfoOfProcessPrefix = "/proc/self/"):
-                         memInfoFile(memInfoFile),
+                         memInfoFile(memInfo),
                          memInfoOfProcessFile(memInfoOfProcess),
                          memInfoOfProcessPrefixFile(memInfoOfProcessPrefix) {};
     //memory
