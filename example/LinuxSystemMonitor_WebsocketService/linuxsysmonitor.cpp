@@ -19,6 +19,7 @@ void linuxsysmonitor::run() {
         json sysvalues;
         this->getlinuxSysMonitoringData();
         to_json(sysvalues, this->linuxDataModel);
+        this->Notify(sysvalues);
         std::this_thread::sleep_for(this->interval);
     }
 
@@ -90,5 +91,21 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_system().set_sys_uptime_min(p->tm_min);
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_system().set_sys_uptime_sec(p->tm_sec);
     return linuxDataModel;
+}
+
+void linuxsysmonitor::Attach(IObserver *observer) {
+    list_observer_.push_back(observer);
+}
+
+void linuxsysmonitor::Detach(IObserver *observer) {
+    list_observer_.remove(observer);
+}
+
+void linuxsysmonitor::Notify(json obj) {
+    auto iterator = list_observer_.begin();
+    while (iterator != list_observer_.end()) {
+        (*iterator)->Update(obj);
+        ++iterator;
+    }
 }
 

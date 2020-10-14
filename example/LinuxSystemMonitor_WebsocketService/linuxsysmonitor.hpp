@@ -19,18 +19,33 @@ using json = nlohmann::json;
 
 
 
+class IObserver {
+public:
+    virtual ~IObserver(){};
+    virtual void Update(const json &message_from_subject) = 0;
+};
 
+class ISubject {
+public:
+    virtual ~ISubject(){};
+    virtual void Attach(IObserver *observer) = 0;
+    virtual void Detach(IObserver *observer) = 0;
+    virtual void Notify(json obj) = 0;
+};
 
-class linuxsysmonitor {
+class linuxsysmonitor : public ISubject {
 
 public:
     void setRunB(bool runB);
     linuxsysmonitor(const std::chrono::milliseconds &interval);
     linuxsysmonitor();
     linuxmonitoring_data::DataLinuxmonitoring getlinuxSysMonitoringData();
-
+    void Attach(IObserver *observer) override;
+    void Detach(IObserver *observer) override;
+    void Notify(json) override;
 
 private:
+    std::list<IObserver *> list_observer_;
     void init();
 
     void run();

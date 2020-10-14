@@ -1,6 +1,5 @@
 #include "linux_cpuload.hpp"
 #include <stdexcept>
-#include <sstream>
 #include <fstream>
 #include <iostream>
 #include <cmath>
