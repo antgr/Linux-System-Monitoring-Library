@@ -4,14 +4,6 @@ i created this Library where i can get the CPU Load / Ethernet Load and Memory c
 a backend application or print it on a display. 
 
 
-[Picture of LCD with load].
-+ Link to repo -> 
-+ Link to example
-
-[Screenshot of Grafana and Load].
-+ Link to example
-
-
 
 ### Features:
 
@@ -29,7 +21,22 @@ a backend application or print it on a display.
   * Total Memory
   * Memory Usage per Process
   
-### Monitorig Data are presented in JSON: 
+* Linux Features:
+    * is remote Device Online - (parse Ping response)
+    * getPID by Name
+    * getOSVersion
+    * SysUptime
+    * Number of Threads by PID 
+    * setApplication as Deamon
+
+
+## How to build:
+
+## Example:
+
+### Linux Monitoring Websocket Server:
+This app starts a websocket Server which offers the linuxsystem monitor values as a Json object.
+#### Monitorig Data are presented in JSON: 
 therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) + the very cool [Json to C++](https://app.quicktype.io/) Code 
     
     {
@@ -104,27 +111,19 @@ therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) + th
       "type": "system"
     }
  
-  
-  
+[for detailed Information](./example/LinuxSystemMonitor_WebsocketService/Readme.md)
 
-* Linux Features:
-    * is remote Device Online - (parse Ping response)
-    * getPID by Name
-    * getOSVersion
-    * SysUptime
-    * Number of Threads by PID 
-    * setApplication as Deamon
-
-
-## How to build:
-
-## Example:
 
 #### Simple Monitor:
-    emory load: 47.76% maxmemory: 16133756Kb used: 7705056Kb  Memload of this Process 6260KB 
+App loop through the results of linux monitor lib and prints out memory load, cpu load, network load as the following:
+
+    memory load: 47.76% maxmemory: 16133756Kb used: 7705056Kb  Memload of this Process 6260KB 
     cpu load: 50.8292% of cpu: : Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
     mulitcore [ 52.48 % 48.45 % 47.06 % 51 % 54.46 % 49.5 % 53.92 % 51.49 % 47.52 % 52.48 % 48.45 % 54.37 %  ]
     network load: wlp0s20f3 : 21.1mBit/s RX Bytes Startup: 37696419 TX Bytes Startup: 1734702657
+    
+    
+[for detailed Information](./example/simplemonitor/Readme.md)
 
     
 
@@ -144,4 +143,10 @@ If there are any Bugs or Request for extensions or features, feel free
 [email me](fuxeysolution@gmail.com) me or [buy me a coffee](https://www.paypal.me/fuxeey).
 
 
+#### Used 3rdparty libs(for the examples) - Library is plain c++:
 
+* [cxxopts - argument parser lib](https://github.com/jarro2783/cxxopts)
+* [nlohmann json - very handy json lib](https://github.com/nlohmann/json)
+* [quicktype - json object to cpp code](https://app.quicktype.io/)
+* [uWebsockets - handy lightweight high performance websocket lib](https://github.com/uNetworking/uWebSockets)
+* [uSockets - socket lib which uWebsockets built on top](https://github.com/uNetworking/uSockets)

@@ -16,7 +16,6 @@
 #include <iostream>
 #include <json.hpp>
 #include <string>
-#include <streambuf>
 #include <thread>
 #include <atomic>
 #include <chrono>
@@ -34,19 +33,23 @@ using json = nlohmann::json;
 class PerSocketData : public IObserver {
 public:
 
-    void shutdown() {
+    void
+    shutdown() {
         this->linuxMon->Detach(this);
     }
 
     void
-    setConnectedWebsocket(uWS::WebSocket<true, true> *socket, std::shared_ptr<linuxsysmonitor> linuxsysmonitorinst) {
-         this->connectedWS = socket;
-         this->linuxMon = std::move(linuxsysmonitorinst);
-         this->linuxMon->Attach(this);
-         std::cout << "send to ws " << this->connectedWS << std::endl;
-         this->connectedWS->send("send json dump", uWS::OpCode::TEXT);
+    setConnectedWebsocket(uWS::WebSocket<true, true> *socket,
+                          std::shared_ptr<linuxsysmonitor> linuxsysmonitorinst) {
+        this->connectedWS = socket;
+        this->linuxMon = std::move(linuxsysmonitorinst);
+        this->linuxMon->Attach(this);
+        std::cout << "send to ws " << this->connectedWS << std::endl;
+        this->connectedWS->send("send json dump", uWS::OpCode::TEXT);
     }
-    void Update(const json &message_from_subject) override {
+
+    void
+    Update(const json &message_from_subject) override {
         this->connectedWS->send(message_from_subject.dump(), uWS::OpCode::TEXT);
     }
 
@@ -104,27 +107,28 @@ private:
                 }
         }).listen(this->portToListen, [&](us_listen_socket_t *token) {
             if (token) {
-                std::cout   << "WebsocketServer Listening on port "
-                            << this->portToListen
-                            << " with route "
-                            << route << std::endl;
+                std::cout << "WebsocketServer Listening on port "
+                          << this->portToListen
+                          << " with route "
+                          << route << std::endl;
             }
         }).run();
-        std::cerr << "WebsocketServer undefined behavior!"<< std::endl;
+        std::cerr << "WebsocketServer undefined behavior!" << std::endl;
     }
 
 
 public:
 
-    explicit LinuxMonitorWebSocketBridge(std::string privateKeyPath,
-                                std::string publicCertPath,
-                                std::string passphrase = "",
-                                uint16_t portNum = 4002) {
+    explicit LinuxMonitorWebSocketBridge(const std::string privateKeyPath,
+                                         const std::string publicCertPath,
+                                         const std::string passphrase = "",
+                                         const uint16_t portNum = 4002,
+                                         const std::chrono::milliseconds &timeoutInterval = std::chrono::milliseconds(1000)) {
         this->portToListen = portNum;
         this->publicCerts = std::move(publicCertPath);
         this->privateKey = std::move(privateKeyPath);
         this->passPhrase = std::move(passphrase);
-        linuxMon = std::make_shared<linuxsysmonitor>(std::chrono::milliseconds(1000));
+        linuxMon = std::make_shared<linuxsysmonitor>(timeoutInterval);
     }
 
     void runServer(std::string route, bool detach = false) {
@@ -139,7 +143,7 @@ public:
 };
 
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char *argv[]) {
 
     cxxopts::Options options("BME680 Monitoring Testing",
                              "generates sensor values and tests secure webinterface and mqtt pushing");
@@ -148,15 +152,18 @@ int main(int argc, const char* argv[]) {
             ("c,public_cert", "path to public cert", cxxopts::value<std::string>()->default_value(""))
             ("k,private_key", "path to private key", cxxopts::value<std::string>()->default_value(""))
             ("p,websocketport_num", "Port to listen on", cxxopts::value<int>()->default_value("4002"))
+            ("i,sendInterval", "sendInterval where data sent out in milliseconds",
+             cxxopts::value<int>()->default_value("1000"))
             ("f,json", "File name", cxxopts::value<std::string>());
     auto result = options.parse(argc, argv);
 
     auto webSocketLinuxMonitor = std::make_unique<LinuxMonitorWebSocketBridge>(
-                std::string(result["private_key"].as<std::string>()),
-                std::string(result["public_cert"].as<std::string>()),
-                "",
-                result["websocketport_num"].as<int>()
-        );
+            std::string(result["private_key"].as<std::string>()),
+            std::string(result["public_cert"].as<std::string>()),
+            "",
+            result["websocketport_num"].as<int>(),
+            std::chrono::milliseconds(result["sendInterval"].as<int>())
+    );
 
     webSocketLinuxMonitor->runServer("/linuxmonitor", false);
     return 0;

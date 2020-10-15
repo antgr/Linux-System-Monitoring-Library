@@ -1,7 +1,3 @@
-//
-// Created by df on 30.09.20.
-//
-
 #include <iostream>
 #include <csignal>
 #include <memory>
