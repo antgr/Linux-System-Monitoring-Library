@@ -1,13 +1,9 @@
 #include "linuxsysmonitor.hpp"
 #include <iostream>
 
-linuxsysmonitor::linuxsysmonitor() {
-    init();
-}
-
 linuxsysmonitor::linuxsysmonitor(const std::chrono::milliseconds &interval) : interval(interval) {
     init();
-    t = new std::thread(&linuxsysmonitor::run,this);
+    t = new std::thread(&linuxsysmonitor::run, this);
     t->detach();
 }
 
@@ -29,7 +25,6 @@ void linuxsysmonitor::setRunB(bool runB) {
     run_b = runB;
 }
 
-
 void linuxsysmonitor::init() {
     cpu = std::make_unique<cpuLoad>();
     syscalls = std::make_unique<linuxUtil>();
@@ -39,10 +34,9 @@ void linuxsysmonitor::init() {
     this->sysEthernet_v = networkLoad::createLinuxEthernetScanList();
 }
 
-
-
 linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoringData() {
-    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_cpu().set_cpu_usage(round(cpu->getCurrentCpuUsage()*100)/100);
+    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_cpu().set_cpu_usage(
+            round(cpu->getCurrentCpuUsage() * 100) / 100);
     auto cpuload = cpu->getCurrentMultiCoreUsage();
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_cpu().set_multi_usage(cpuload);
 
@@ -50,9 +44,9 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
     int cnt = 0;
     char buf[40];
     std::vector<std::string> cpuUsage;
-    for(auto & elem: cpuload ) {
+    for (auto &elem: cpuload) {
         multicore = "CPU" + std::to_string(cnt++) + ":";
-        std::snprintf(buf,40,"%.2f",round(elem*100)/100);
+        std::snprintf(buf, 40, "%.2f", round(elem * 100) / 100);
         multicore += std::string(buf);
         multicore += "%";
         cpuUsage.push_back(multicore);
@@ -65,7 +59,7 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
 
 
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_linuxethernet().clear();
-    for(auto elem : this->sysEthernet_v) {
+    for (auto elem : this->sysEthernet_v) {
         linuxmonitoring_data::Linuxethernet obj;
         obj.set_i_face(elem->getDeviceName());
         obj.set_bytes_total_per_second(elem->getBytesPerSeceondString(elem->getBytesPerSecond()));
@@ -77,10 +71,14 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
         linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_linuxethernet().push_back(obj);
     }
 
-    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_perc(sysMemory->getCurrentMemUsageInPercent());
-    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_kib(sysMemory->getCurrentMemUsageInKB());
-    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_total_kib(sysMemory->getTotalMemoryInKB());
-    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_of_process(sysMemory->getMemoryUsageByThisProcess());
+    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_perc(
+            sysMemory->getCurrentMemUsageInPercent());
+    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_kib(
+            sysMemory->getCurrentMemUsageInKB());
+    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_total_kib(
+            sysMemory->getTotalMemoryInKB());
+    linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_memory_usage().set_memory_usage_of_process(
+            sysMemory->getMemoryUsageByThisProcess());
 
     time_t seconds(syscalls->getSysUpTime()); // you have to convert your input_seconds into time_t
     tm *p = gmtime(&seconds); // convert to broken down time
@@ -102,10 +100,8 @@ void linuxsysmonitor::Detach(IObserver *observer) {
 }
 
 void linuxsysmonitor::Notify(json obj) {
-    auto iterator = list_observer_.begin();
-    while (iterator != list_observer_.end()) {
-        (*iterator)->Update(obj);
-        ++iterator;
+    for(auto elem : this->list_observer_) {
+        elem->Update(obj);
     }
 }
 

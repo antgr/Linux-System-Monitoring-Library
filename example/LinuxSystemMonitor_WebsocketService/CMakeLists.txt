@@ -18,4 +18,5 @@ target_link_libraries(linuxsystemMonitor
         ssl
         )
 
-target_link_libraries(linuxsystemMonitor uSockets z)
+target_link_libraries(linuxsystemMonitor z)
+target_link_libraries(linuxsystemMonitor ${CMAKE_HOME_DIRECTORY}/thirdparty/uSockets/uSockets.a)

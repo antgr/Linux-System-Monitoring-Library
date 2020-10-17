@@ -20,9 +20,6 @@ static void installHandler() {
     std::signal(SIGPIPE, signalHandler);
 }
 
-
-
-
 int main(int argc, char *argv[]) {
 
     (void)argc;
@@ -58,8 +55,5 @@ int main(int argc, char *argv[]) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
     }
-
-
-
 
 }

@@ -37,8 +37,7 @@ class linuxsysmonitor : public ISubject {
 
 public:
     void setRunB(bool runB);
-    linuxsysmonitor(const std::chrono::milliseconds &interval);
-    linuxsysmonitor();
+    explicit  linuxsysmonitor(const std::chrono::milliseconds &interval);
     linuxmonitoring_data::DataLinuxmonitoring getlinuxSysMonitoringData();
     void Attach(IObserver *observer) override;
     void Detach(IObserver *observer) override;
@@ -47,7 +46,6 @@ public:
 private:
     std::list<IObserver *> list_observer_;
     void init();
-
     void run();
     std::thread *t;
     std::chrono::milliseconds interval;

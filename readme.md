@@ -1,11 +1,15 @@
 # Lightweight Linux Monitoring Library
-For several Projects on Raspberry Pi or OrangePi or my Mini Server i wanted to Monitor the System Load, so therefore, 
+For several Projects on embedded Linux devices and Linux Servers i wanted to monitor the system load so therefore, 
 i created this Library where i can get the CPU Load / Ethernet Load and Memory consumption, to send it via Websocket to 
-a backend application or print it on a display. 
+a backend application or print it on a LCD display or send the data via MQTT: 
 
 
 
 ### Features:
+
+The library consists of STL and c++17 only, no thirdparty library is used (except for the websocket example and Unittests). 
+
+
 
 * CPU Usage:
   * total CPU Usage
@@ -22,22 +26,52 @@ a backend application or print it on a display.
   * Memory Usage per Process
   
 * Linux Utils and Features:
-    * is remote Device Online - (parse Ping response)
-    * getPID by Name
-    * getOSVersion
-    * SysUptime
-    * Number of Threads by PID 
-    * setApplication as Deamon
+  * is remote Device Online - (parse Ping response)
+  * getPID by Name
+  * getOSVersion
+  * SysUptime
+  * Number of Threads by PID 
+  * setApplication as Deamon
 
 
 ## How to build:
+Clone the project: `git clone git@github.com:fuxey/Lightweight_LinuxSystemMonitor.git`
 
-## Example:
+#### build the library:
+
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build . --target linuxmonitoring
+    
+find the library in the folder `lib` of the `build` folder
+
+#### build simple linux load monitor (No thirdpary dependencies): 
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build . --target simple_linuxsystemMonitor
+    
+find the executable in the folder `bin` of the `build` folder
+
+#### build linuxsystem websocket service (thirdpary dependencies needed):
+
+    git submodule update --init --recursive
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build . --target simple_linuxsystemMonitor
+    
+find the executable in the folder `bin` of the `build` folder
+
+
+
+## Examples:
 
 ### Linux Monitoring Websocket Server:
 This app starts a websocket Server which offers the linuxsystem monitor values as a Json object.
 #### Monitorig Data are presented in JSON: 
-therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) + the very cool [Json to C++](https://app.quicktype.io/) Code 
+therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) is used + the very cool [Json to C++](https://app.quicktype.io/) code generator tool. 
     
     {
       "Linuxsystemmonitoring": {
@@ -115,7 +149,7 @@ therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) + th
 
 
 #### Simple Monitor:
-App loop through the results of linux monitor lib and prints out memory load, cpu load, network load as the following:
+Main aim of this example, is to show how to interact with the library. The app loops through the results of linux monitor lib and prints out memory load, cpu load, network load as the following print shows :
 
     memory load: 47.76% maxmemory: 16133756Kb used: 7705056Kb  Memload of this Process 6260KB 
     cpu load: 50.8292% of cpu: : Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
@@ -131,22 +165,23 @@ App loop through the results of linux monitor lib and prints out memory load, cp
 * CPU Usage per Process
 * example -> monitoring and creating graph with grafana
 * example -> avr lcd bridge
-* Testing: Catch2 tests
+* Testing: more Catch2 tests
 * Data Export in JSON, BSON,MSGPack, XML
 * logging and average of 30min, 2h, 6h, 24h , 2d, 7d. 
 * Documentation
-* ethernetparser optimization 
-* memoryparser optimization
+* ~~ethernetparser optimization~~ 
+* ~~memoryparser optimization~~
 
 # Get in Contact: 
 If there are any Bugs or Request for extensions or features, feel free
 [email me](fuxeysolution@gmail.com) me or [buy me a coffee](https://www.paypal.me/fuxeey).
 
 
-#### Used 3rdparty libs(for the examples) - Library is plain c++:
+#### Used 3rdparty libs(for the examples):
 
-* [cxxopts - argument parser lib](https://github.com/jarro2783/cxxopts)
-* [nlohmann json - very handy json lib](https://github.com/nlohmann/json)
+* [cxxopts - argument parser lib (MIT) ](https://github.com/jarro2783/cxxopts)
+* [nlohmann json - very handy json lib (MIT) ](https://github.com/nlohmann/json)
 * [quicktype - json object to cpp code](https://app.quicktype.io/)
-* [uWebsockets - handy lightweight high performance websocket lib](https://github.com/uNetworking/uWebSockets)
-* [uSockets - socket lib which uWebsockets built on top](https://github.com/uNetworking/uSockets)
+* [uWebsockets - handy lightweight high performance websocket lib (Apache 2.0) ](https://github.com/uNetworking/uWebSockets)
+* [uSockets - socket lib which uWebsockets built on top (Apache 2.0)](https://github.com/uNetworking/uSockets)
+* [Catch2 - testing Framework (BSL-1.0)](https://github.com/catchorg/Catch2)
