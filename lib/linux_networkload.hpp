@@ -4,10 +4,10 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <ctime>
-#include <cstdint>
 #include <list>
 #include <vector>
+#include <chrono>
+
 
 class networkLoad {
 
@@ -43,12 +43,12 @@ private:
     uint64_t m_totalTransmittedBytes = 0;
     std::map<std::string, std::string> networkstatMap;
     bool isDeviceAvailable = false;
-    clock_t timeBefore;
-    clock_t timeBefore_rx;
-    clock_t timeBefore_tx;
+    std::chrono::time_point<std::chrono::steady_clock> timeBefore;
+    std::chrono::time_point<std::chrono::steady_clock> timeBefore_rx;
+    std::chrono::time_point<std::chrono::steady_clock> timeBefore_tx;
     uint64_t BytesPerSecond = 0;
     uint64_t BytesSinceStartup = 0;
-
+    std::chrono::time_point<std::chrono::steady_clock> timeStamp;
 
 };
 

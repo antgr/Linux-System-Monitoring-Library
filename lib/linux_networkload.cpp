@@ -25,9 +25,9 @@ std::string networkLoad::getDeviceName() {
 }
 
 void networkLoad::initNetworkMonitor() {
-    this->timeBefore = clock();
-    this->timeBefore_tx = clock();
-    this->timeBefore_rx = clock();
+    this->timeBefore = std::chrono::steady_clock::now();
+    this->timeBefore_tx = std::chrono::steady_clock::now();
+    this->timeBefore_rx = std::chrono::steady_clock::now();
     this->parseEthernetDevice();
     try {
         this->m_totalTransceivedBytes = std::stoull(this->networkstatMap["RXbytes"], nullptr, 10);
@@ -40,6 +40,15 @@ void networkLoad::initNetworkMonitor() {
 }
 
 uint64_t networkLoad::parseEthernetDevice() {
+
+
+    if(this->timeStamp + std::chrono::milliseconds(1000) > std::chrono::steady_clock::now()) {
+        return 0;
+    } else {
+        this->timeStamp = std::chrono::steady_clock::now();
+    }
+
+
     std::ifstream ethernetFile;
     try {
         ethernetFile.open(this->ethernetDataFile);
@@ -129,7 +138,6 @@ std::list<std::string> networkLoad::scanNetworkDevices(std::string ethernetDataF
         if ((pos = line.find(":")) != std::string::npos) {
             std::string ifDev = line.substr(0, pos);
             ifDev.erase(std::remove(ifDev.begin(), ifDev.end(), ' '), ifDev.end());
-            //throw std::runtime_error("found networkdevice: " + ifDev);
             netWorkDevices.push_back(ifDev);
         }
     }
@@ -138,46 +146,42 @@ std::list<std::string> networkLoad::scanNetworkDevices(std::string ethernetDataF
 
 uint64_t networkLoad::getTXBytesPerSecond() {
     uint64_t oldBytesTransceived = this->m_totalTransmittedBytes;
-    clock_t oldclock;
-    std::memcpy(&oldclock, &this->timeBefore_tx, sizeof(clock_t));
 
+    std::chrono::time_point<std::chrono::steady_clock> oldclock = this->timeBefore_tx;
 
     this->parseEthernetDevice();
     this->m_totalTransmittedBytes = this->getTXBytesSinceStartup();
 
-    this->timeBefore_tx = clock();
-    clock_t diff = clock() - oldclock;
-    uint32_t msec = diff * 1000 / CLOCKS_PER_SEC;
-    if (msec <= 0) {
-        msec = 1;
-    }
-    uint64_t Bytes = this->m_totalTransmittedBytes - oldBytesTransceived;
-    Bytes *= 1000;
-    Bytes /= msec;
-    Bytes /= 1000;
+    this->timeBefore_tx = std::chrono::steady_clock::now();
+    std::chrono::milliseconds msec = std::chrono::duration_cast<std::chrono::milliseconds> ( this->timeBefore_tx - oldclock);
 
+    uint64_t Bytes = this->m_totalTransceivedBytes - oldBytesTransceived;
+    Bytes *= 1000;
+    if (static_cast<unsigned long>(msec.count()) <= 0) {
+        Bytes /= 1;
+    } else {
+        Bytes /= static_cast<unsigned long>(msec.count());
+    }
     return Bytes;
 }
 
 uint64_t networkLoad::getRXBytesPerSecond() {
     uint64_t oldBytesTransceived = this->m_totalReceivedBytes;
-    clock_t oldclock;
-    std::memcpy(&oldclock, &this->timeBefore_rx, sizeof(clock_t));
+    std::chrono::time_point<std::chrono::steady_clock> oldclock = this->timeBefore_rx;
 
     this->parseEthernetDevice();
     this->m_totalReceivedBytes = this->getRXBytesSinceStartup();
 
-    this->timeBefore_rx = clock();
-    clock_t diff = clock() - oldclock;
-    uint32_t msec = diff * 1000 / CLOCKS_PER_SEC;
-    if (msec <= 0) {
-        msec = 1;
-    }
-    uint64_t Bytes = this->m_totalReceivedBytes - oldBytesTransceived;
-    Bytes *= 1000;
-    Bytes /= msec;
-    Bytes /= 1000;
+    this->timeBefore_rx = std::chrono::steady_clock::now();
+    std::chrono::milliseconds msec = std::chrono::duration_cast<std::chrono::milliseconds> (this->timeBefore_rx - oldclock);
 
+    uint64_t Bytes = this->m_totalTransceivedBytes - oldBytesTransceived;
+    Bytes *= 1000;
+    if (static_cast<unsigned long>(msec.count()) <= 0) {
+        Bytes /= 1;
+    } else {
+        Bytes /= static_cast<unsigned long>(msec.count());
+    }
     return Bytes;
 }
 
@@ -207,8 +211,7 @@ uint64_t networkLoad::getTXBytesSinceStartup() {
 
 uint64_t networkLoad::getBytesPerSecond() {
     uint64_t oldBytesTransceived = this->m_totalTransceivedBytes;
-    clock_t oldclock;
-    std::memcpy(&oldclock, &this->timeBefore, sizeof(clock_t));
+    std::chrono::time_point<std::chrono::steady_clock> oldclock = this->timeBefore;
 
     this->parseEthernetDevice();
     try {
@@ -218,17 +221,16 @@ uint64_t networkLoad::getBytesPerSecond() {
         e.what();
         return 0;
     }
-    timeBefore = clock();
-    clock_t diff = clock() - oldclock;
-    uint32_t msec = diff * 1000 / CLOCKS_PER_SEC;
-    if (msec <= 0) {
-        msec = 1;
-    }
+    this->timeBefore = std::chrono::steady_clock::now();
+    std::chrono::milliseconds msec = std::chrono::duration_cast<std::chrono::milliseconds> (this->timeBefore - oldclock);
+
     uint64_t Bytes = this->m_totalTransceivedBytes - oldBytesTransceived;
     Bytes *= 1000;
-    Bytes /= msec;
-    Bytes /= 1000;
-
+    if (static_cast<unsigned long>(msec.count()) <= 0) {
+        Bytes /= 1;
+    } else {
+        Bytes /= static_cast<unsigned long>(msec.count());
+    }
     return Bytes;
 }
 

@@ -21,7 +21,7 @@ a backend application or print it on a display.
   * Total Memory
   * Memory Usage per Process
   
-* Linux Features:
+* Linux Utils and Features:
     * is remote Device Online - (parse Ping response)
     * getPID by Name
     * getOSVersion

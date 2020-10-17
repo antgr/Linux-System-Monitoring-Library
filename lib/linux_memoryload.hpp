@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <chrono>
 
 class memoryLoad {
 public:
@@ -23,4 +24,5 @@ private:
     std::string memInfoFile;
     std::string memInfoOfProcessFile;
     std::string memInfoOfProcessPrefixFile;
+    std::chrono::time_point<std::chrono::steady_clock> timeStamp;
 };

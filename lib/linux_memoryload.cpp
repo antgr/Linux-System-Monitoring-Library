@@ -4,9 +4,12 @@
 #include <iostream>
 
 bool memoryLoad::parseMemoryFile() {
+    if(timeStamp + std::chrono::milliseconds(100) > std::chrono::steady_clock::now()) {
+        return true;
+    }
     std::ifstream memoryFile;
     memoryFile.open(this->memInfoFile);
-
+    this->timeStamp = std::chrono::steady_clock::now();
     if (!memoryFile.is_open()) {
         return false;
     }
@@ -21,10 +24,12 @@ bool memoryLoad::parseMemoryFile() {
 }
 
 uint64_t memoryLoad::getTotalMemoryInKB() {
+    this->parseMemoryFile();
     return this->totalMemoryInKB;
 }
 
 uint64_t memoryLoad::getCurrentMemUsageInKB() {
+    this->parseMemoryFile();
     return this->getTotalMemoryInKB() - this->currentMemoryUsageInKB;
 }
 
