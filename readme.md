@@ -173,8 +173,8 @@ Main aim of this example, is to show how to interact with the library. The app l
 * ~~memoryparser optimization~~
 
 # Get in Contact: 
-If there are any Bugs or Request for extensions or features, feel free
-[email me](fuxeysolution@gmail.com) me or [buy me a coffee](https://www.paypal.me/fuxeey).
+If there are any Bugs or Request for extensions or features, feel free to
+[email me](fuxeysolution@gmail.com).
 
 
 #### Used 3rdparty libs(for the examples):

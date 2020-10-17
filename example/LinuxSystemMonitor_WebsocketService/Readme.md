@@ -12,12 +12,12 @@ This application consists of the following libs:
 * [uWebsockets - handy lightweight high performance websocket lib](https://github.com/uNetworking/uWebSockets)
 * [uSockets - socket lib which uWebsockets built on top](https://github.com/uNetworking/uSockets)
 
-####Parameter:
+#### Parameter:
     -c public_cert  "path to public cert"
     -k private_key  "path to private key"
     -p websocketport_num  "Port to listen on"
     -i sendInterval  "sendInterval where data sent out
     
     
-####Connect to Websocket Server:
+#### Connect to Websocket Server:
 ![websocketCLient](./websocket.png)
