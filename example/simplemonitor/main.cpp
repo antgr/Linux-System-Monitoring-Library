@@ -45,12 +45,17 @@ int main(int argc, char *argv[]) {
             std::cout << cpu << " % ";
         }
         std::cout << " ]" <<std::endl;
-        for(auto elem: ethernetMonitoring) {
-            std::cout   << "network load: " << elem->getDeviceName() << " : "
-                        << elem->getBitsPerSeceondString(elem->getBytesPerSecond())
-                        << " RX Bytes Startup: " << elem->getRXBytesSinceStartup()
-                        << " TX Bytes Startup: " << elem->getTXBytesSinceStartup()
-                        << std::endl;
+
+         for(auto elem: ethernetMonitoring) {
+            if(elem->getDeviceName() == "enxcc483a803ea7") {
+                std::cout << "network load: " << elem->getDeviceName() << " : "
+                          << elem->getBitsPerSeceondString(elem->getBytesPerSecond()) << " : "
+                          << elem->getBitsPerSeceondString(elem->getRXBytesPerSecond()) << " : "
+                          << elem->getBitsPerSeceondString(elem->getTXBytesPerSecond()) << " : "
+                          << " RX Bytes Startup: " << elem->getRXBytesSinceStartup()
+                          << " TX Bytes Startup: " << elem->getTXBytesSinceStartup()
+                          << std::endl;
+            }
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
