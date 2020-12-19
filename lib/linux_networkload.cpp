@@ -8,14 +8,15 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cstring>
+#include <utility>
 
 
-networkLoad::networkLoad(std::string ethernetDataFileName, std::string ethName) : ethernetDataFile(ethernetDataFileName), ethDev(ethName) {
+networkLoad::networkLoad(std::string ethernetDataFileName, std::string ethName) : ethernetDataFile(std::move(ethernetDataFileName)), ethDev(std::move(ethName)) {
     this->initNetworkMonitor();
 }
 
 
-bool networkLoad::isDeviceUp() {
+bool networkLoad::isDeviceUp() const {
     return this->isDeviceAvailable;
 }
 
@@ -54,7 +55,6 @@ uint64_t networkLoad::parseEthernetDevice() {
         ethernetFile.open(this->ethernetDataFile);
     } catch (std::ifstream::failure &e) {
         throw std::runtime_error("Exception: " +this->ethernetDataFile + std::string(e.what()));
-        return 0;
     }
 
 
@@ -88,7 +88,7 @@ uint64_t networkLoad::parseEthernetDevice() {
     }
     while (std::getline(ethernetFile, line)) {
         std::string str_line(line);
-        std::list<std::string>::iterator lit = identifiers.begin();
+        auto lit = identifiers.begin();
         if ((str_line.find(this->networkstatMap["IF"])) != std::string::npos) {
             std::string line_;
             std::istringstream ss(str_line);
@@ -96,7 +96,6 @@ uint64_t networkLoad::parseEthernetDevice() {
             while (std::getline(ss, line_, ' ')) {
                 try {
                     uint64_t parsedULL = std::stoull(line_, nullptr, 10);
-                    //qInfo() << parsedULL;
                     if (lit != identifiers.end()) {
                         it = networkstatMap.find(*lit);
                         if (it == networkstatMap.end()) {
@@ -119,7 +118,7 @@ uint64_t networkLoad::parseEthernetDevice() {
     return 0;
 }
 
-std::list<std::string> networkLoad::scanNetworkDevices(std::string ethernetDataFile) {
+std::list<std::string> networkLoad::scanNetworkDevices(const std::string& ethernetDataFile) {
 
     std::list<std::string> netWorkDevices;
     std::ifstream ethernetFile;
@@ -134,7 +133,7 @@ std::list<std::string> networkLoad::scanNetworkDevices(std::string ethernetDataF
     }
     std::string line;
     while (std::getline(ethernetFile, line)) {
-        size_t pos = 0;
+        size_t pos;
         if ((pos = line.find(":")) != std::string::npos) {
             std::string ifDev = line.substr(0, pos);
             ifDev.erase(std::remove(ifDev.begin(), ifDev.end(), ' '), ifDev.end());
@@ -155,7 +154,7 @@ uint64_t networkLoad::getTXBytesPerSecond() {
     this->timeBefore_tx = std::chrono::steady_clock::now();
     std::chrono::milliseconds msec = std::chrono::duration_cast<std::chrono::milliseconds> ( this->timeBefore_tx - oldclock);
 
-    uint64_t Bytes = this->m_totalTransceivedBytes - oldBytesTransceived;
+    uint64_t Bytes = this->m_totalTransmittedBytes - oldBytesTransceived;
     Bytes *= 1000;
     if (static_cast<unsigned long>(msec.count()) <= 0) {
         Bytes /= 1;
@@ -175,7 +174,7 @@ uint64_t networkLoad::getRXBytesPerSecond() {
     this->timeBefore_rx = std::chrono::steady_clock::now();
     std::chrono::milliseconds msec = std::chrono::duration_cast<std::chrono::milliseconds> (this->timeBefore_rx - oldclock);
 
-    uint64_t Bytes = this->m_totalTransceivedBytes - oldBytesTransceived;
+    uint64_t Bytes = this->m_totalReceivedBytes - oldBytesTransceived;
     Bytes *= 1000;
     if (static_cast<unsigned long>(msec.count()) <= 0) {
         Bytes /= 1;

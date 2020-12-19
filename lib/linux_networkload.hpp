@@ -12,11 +12,11 @@
 class networkLoad {
 
 public:
-    static std::list<std::string> scanNetworkDevices(std::string ethernetDataFile);
-    static std::vector<std::shared_ptr<networkLoad>> createLinuxEthernetScanList() {
+    static std::list<std::string> scanNetworkDevices(const std::string& ethernetDataFile);
+    static std::vector<std::shared_ptr<networkLoad>> createLinuxEthernetScanList(const std::string& ethernetDataFileName = "/proc/net/dev") {
         std::vector<std::shared_ptr<networkLoad>> v;
-        for (auto elem: networkLoad::scanNetworkDevices("/proc/net/dev")) {
-            v.push_back(std::make_shared<networkLoad>("/proc/net/dev",elem));
+        for (const auto& elem: networkLoad::scanNetworkDevices(ethernetDataFileName)) {
+            v.push_back(std::make_shared<networkLoad>(ethernetDataFileName,elem));
         }
         return v;
     }
@@ -28,9 +28,9 @@ public:
     uint64_t getRXBytesSinceStartup();
     uint64_t getTXBytesPerSecond();
     uint64_t getTXBytesSinceStartup();
-    std::string getBytesPerSeceondString(uint64_t bytesPerSecond);
-    std::string getBitsPerSeceondString(uint64_t bytesPerSecond);
-    bool isDeviceUp();
+    static std::string getBytesPerSeceondString(uint64_t bytesPerSecond);
+    static std::string getBitsPerSeceondString(uint64_t bytesPerSecond);
+    bool isDeviceUp() const;
     std::string getDeviceName();
 
 private:
