@@ -8,9 +8,12 @@ public:
     explicit memoryLoad(std::string memInfo = "/proc/meminfo",
                         std::string memInfoOfProcess = "/proc/self/status",
                         std::string memInfoOfProcessPrefix = "/proc/self/"):
-                         memInfoFile(memInfo),
-                         memInfoOfProcessFile(memInfoOfProcess),
-                         memInfoOfProcessPrefixFile(memInfoOfProcessPrefix) {};
+                        totalMemoryInKB(0),
+                        currentMemoryUsageInKB(0),
+                         memInfoFile(std::move(memInfo)),
+                         memInfoOfProcessFile(std::move(memInfoOfProcess)),
+                         memInfoOfProcessPrefixFile(std::move(memInfoOfProcessPrefix))
+                          {};
     //memory
     uint64_t getTotalMemoryInKB();
     uint64_t getCurrentMemUsageInKB();

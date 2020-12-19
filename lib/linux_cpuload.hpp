@@ -7,12 +7,12 @@ class cpuLoad {
 
 public:
     explicit cpuLoad(std::string procFileName = "/proc/stat"):
-    procFile(procFileName), cpuName("") {};
+    procFile(std::move(procFileName)), cpuName("") {};
     void initcpuUsage();
     double getCurrentCpuUsage();
     std::vector<double> getCurrentMultiCoreUsage();
     void initMultiCore();
-    uint32_t getCores() {
+    uint32_t getCores() const {
         return numOfCpus;
     }
 

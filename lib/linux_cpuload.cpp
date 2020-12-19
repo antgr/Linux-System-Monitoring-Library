@@ -56,22 +56,20 @@ std::vector<double> cpuLoad::getCurrentMultiCoreUsage() {
 
     if (!file.is_open()) {
         throw std::runtime_error("unable to open " + this->procFile);
-        return std::vector<double>();
     }
 
-    std::string cpu = "cpu";
+    std::string cpu;
     std::string line;
 
-    if (this->vec_lastTotalUser.size() == 0 ||
-        this->vec_lastTotalUserLow.size() == 0 ||
-        this->vec_lastTotalIdle.size() == 0 ||
-        this->vec_lastTotalSys.size() == 0) {
+    if (this->vec_lastTotalUser.empty() ||
+        this->vec_lastTotalUserLow.empty() ||
+        this->vec_lastTotalIdle.empty() ||
+        this->vec_lastTotalSys.empty()) {
         throw std::runtime_error("init went wrong");
-        return std::vector<double>();
     }
     uint32_t cnt = 0;
     while (std::getline(file, line)) {
-        double percent = 0.0;
+        double percent;
         for (uint32_t i = cnt; i < this->numOfCpus; i++) {
             cpu = "cpu";
             cpu += std::to_string(i);
@@ -91,7 +89,6 @@ std::vector<double> cpuLoad::getCurrentMultiCoreUsage() {
 
                 if (r == -1) {
                     throw std::runtime_error("fscanf of file failed init multicpu");
-                    break;
                 }
                 if (totalUser < this->vec_lastTotalUser.at(i)
                     || totalUserLow < this->vec_lastTotalUserLow.at(i)
@@ -132,7 +129,6 @@ void cpuLoad::initMultiCore() {
 
     if (!file.is_open()) {
         throw std::runtime_error("unable to open " + this->procFile);
-        return;
     }
     std::string line;
     while (std::getline(file, line)) {
@@ -146,7 +142,7 @@ void cpuLoad::initMultiCore() {
     this->vec_lastTotalUser.resize(this->numOfCpus);
     this->vec_lastTotalUserLow.resize(this->numOfCpus);
     this->vec_lastTotalIdle.resize(this->numOfCpus);
-    std::string cpu = "cpu";
+    std::string cpu;
 
     uint32_t cnt = 0;
     file.clear();
@@ -167,7 +163,6 @@ void cpuLoad::initMultiCore() {
                                 &totalIdle);
                 if (r == -1) {
                     throw std::runtime_error("fscanf of file failed init multicpu");
-                    break;
                 } else {
                     this->vec_lastTotalSys[i] = totalSys;
                     this->vec_lastTotalIdle[i] = totalIdle;
@@ -196,7 +191,6 @@ std::string cpuLoad::getCPUName(std::string cpuNameFile) {
 
     if (!file.is_open()) {
         throw std::runtime_error("unable to open " +cpuNameFile);
-        return std::string();
     }
     std::string line;
     while (std::getline(file, line)) {
