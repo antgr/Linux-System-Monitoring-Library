@@ -1,8 +1,8 @@
 #include "linuxsysmonitor.hpp"
 #include <iostream>
 
-linuxsysmonitor::linuxsysmonitor(const std::chrono::milliseconds &interval) : interval(interval) {
-    init();
+linuxsysmonitor::linuxsysmonitor(const std::chrono::milliseconds &interval, std::string basepath) : interval(interval) {
+    init(basepath);
     t = new std::thread(&linuxsysmonitor::run, this);
     t->detach();
 }
@@ -25,13 +25,15 @@ void linuxsysmonitor::setRunB(bool runB) {
     run_b = runB;
 }
 
-void linuxsysmonitor::init() {
-    cpu = std::make_unique<cpuLoad>();
+void linuxsysmonitor::init(std::string basepath) {
+    cpu = std::make_unique<cpuLoad>(basepath + "stat");
     syscalls = std::make_unique<linuxUtil>();
-    sysMemory = std::make_unique<memoryLoad>();
+    sysMemory = std::make_unique<memoryLoad>(basepath + "meminfo",
+                                             basepath + "self/status",
+                                             basepath + "self/");
     cpu->initMultiCore();
     cpu->initcpuUsage();
-    this->sysEthernet_v = networkLoad::createLinuxEthernetScanList();
+    this->sysEthernet_v = networkLoad::createLinuxEthernetScanList(basepath + "net/dev");
 }
 
 linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoringData() {
@@ -62,12 +64,12 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
     for (auto elem : this->sysEthernet_v) {
         linuxmonitoring_data::Linuxethernet obj;
         obj.set_i_face(elem->getDeviceName());
-        obj.set_bytes_total_per_second(elem->getBytesPerSeceondString(elem->getBytesPerSecond()));
+        obj.set_bytes_total_per_second(networkLoad::getBytesPerSeceondString(elem->getBytesPerSecond()));
         obj.set_bytes_total(elem->getBytesSinceStartup());
-        obj.set_bytes_rx_second(elem->getBytesPerSeceondString(elem->getRXBytesPerSecond()));
+        obj.set_bytes_rx_second(networkLoad::getBytesPerSeceondString(elem->getRXBytesPerSecond()));
         obj.set_bytes_rx_total(elem->getRXBytesSinceStartup());
-        obj.set_bytes_tx_second(elem->getBytesPerSeceondString(elem->getTXBytesPerSecond()));
-        obj.set_bits_rx_second(elem->getBitsPerSeceondString(elem->getRXBytesPerSecond()));
+        obj.set_bytes_tx_second(networkLoad::getBytesPerSeceondString(elem->getTXBytesPerSecond()));
+        obj.set_bits_rx_second(networkLoad::getBitsPerSeceondString(elem->getRXBytesPerSecond()));
         linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_linuxethernet().push_back(obj);
     }
 
@@ -81,7 +83,7 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
             sysMemory->getMemoryUsageByThisProcess());
 
     time_t seconds(syscalls->getSysUpTime()); // you have to convert your input_seconds into time_t
-    tm *p = gmtime(&seconds); // convert to broken down time
+    tm *p = gmtime(&seconds); // convert to day hour min sec
 
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_system().set_sys_uptime(syscalls->getSysUpTime());
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_system().set_sys_uptime_days(p->tm_yday);
@@ -100,7 +102,7 @@ void linuxsysmonitor::Detach(IObserver *observer) {
 }
 
 void linuxsysmonitor::Notify(json obj) {
-    for(auto elem : this->list_observer_) {
+    for (auto elem : this->list_observer_) {
         elem->Update(obj);
     }
 }
