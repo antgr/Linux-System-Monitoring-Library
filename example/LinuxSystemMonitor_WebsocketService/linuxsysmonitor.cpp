@@ -1,10 +1,10 @@
 #include "linuxsysmonitor.hpp"
 #include <iostream>
 
-linuxsysmonitor::linuxsysmonitor(const std::chrono::milliseconds &interval, std::string basepath) : interval(interval) {
-    init(basepath);
-    t = new std::thread(&linuxsysmonitor::run, this);
-    t->detach();
+linuxsysmonitor::linuxsysmonitor(const std::chrono::milliseconds &interval, const std::string& basepath) : interval(interval) {
+    this->init(basepath);
+    this->workerThread = new std::thread(&linuxsysmonitor::run, this);
+    this->workerThread->detach();
 }
 
 void linuxsysmonitor::run() {
@@ -25,7 +25,7 @@ void linuxsysmonitor::setRunB(bool runB) {
     run_b = runB;
 }
 
-void linuxsysmonitor::init(std::string basepath) {
+void linuxsysmonitor::init(const std::string& basepath) {
     cpu = std::make_unique<cpuLoad>(basepath + "stat");
     syscalls = std::make_unique<linuxUtil>();
     sysMemory = std::make_unique<memoryLoad>(basepath + "meminfo",
@@ -61,7 +61,7 @@ linuxmonitoring_data::DataLinuxmonitoring linuxsysmonitor::getlinuxSysMonitoring
 
 
     linuxDataModel.get_mutable_linuxsystemmonitoring().get_mutable_linuxethernet().clear();
-    for (auto elem : this->sysEthernet_v) {
+    for (const auto& elem : this->sysEthernet_v) {
         linuxmonitoring_data::Linuxethernet obj;
         obj.set_i_face(elem->getDeviceName());
         obj.set_bytes_total_per_second(networkLoad::getBytesPerSeceondString(elem->getBytesPerSecond()));

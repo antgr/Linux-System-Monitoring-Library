@@ -5,7 +5,7 @@
 <body>
 <h1>WebSocket Client</h1>
 <p>
-    Host: <input id="webSocketHost" type="text" value="localhost:4002/linuxmonitor"/>
+    Host: <input id="webSocketHost" type="text" value="localhost:4004/linuxmonitor"/>
 </p>
 <p>
     <button onClick="initWebSocket();">Connect</button>
@@ -28,12 +28,15 @@
 
     function initWebSocket() {
         try {
-            if (typeof MozWebSocket == 'function')
+            /*if (typeof MozWebSocket == 'function')
                 WebSocket = MozWebSocket;
+            */
             if ( websocket && websocket.readyState == 1 )
                 websocket.close();
-            var wsUri = "ws://" + document.getElementById("webSocketHost").value;
+
+            var wsUri = "wss://" + document.getElementById("webSocketHost").value;
             websocket = new WebSocket( wsUri );
+
             websocket.onopen = function (evt) {
                 debug("CONNECTED");
                 document.getElementById("disconnectButton").disabled = false;
@@ -49,8 +52,10 @@
                 debug( evt.data );
             };
             websocket.onerror = function (evt) {
+                console.log(evt);
                 debug('ERROR: ' + evt.data);
             };
+
         } catch (exception) {
             debug('ERROR: ' + exception);
         }

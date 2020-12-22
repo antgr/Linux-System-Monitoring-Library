@@ -15,25 +15,21 @@
 #include "linux_systemutil.hpp"
 
 
-long linuxUtil::getCPUtemp(void) {
-    FILE *fp;
-    char buffer[4000];
-    size_t bytes_read;
-    long temp;
-    if ((fp = fopen("/sys/class/thermal/thermal_zone0/temp", "r")) == NULL) {
-        perror("fopen()");
-        return 0;
+int64_t linuxUtil::getTemperature(const std::string &thermalZone) {
+    std::ifstream temperatureFile;
+    const std::string parsePath = "/sys/class/thermal/" + thermalZone + "/temp";
+    temperatureFile.open(parsePath);
+
+    int64_t temperature;
+    std::string line;
+    while (std::getline(temperatureFile, line)) {
+        scanf(line.c_str(), "%ld", &temperature);
     }
-    bytes_read = fread(buffer, 1, sizeof(buffer), fp);
-    fclose(fp);
-    if (bytes_read == 0 || bytes_read == sizeof(buffer))
-        return 0;
-    buffer[bytes_read] = '\0';
-    sscanf(buffer, "%ld", &temp);
-    return (temp);
+    temperatureFile.close();
+    return temperature;
 }
 
-int linuxUtil::getProcIdByName(std::string procName) {
+int linuxUtil::getProcIdByName(const std::string &procName) {
     int pid = -1;
     DIR *dp = opendir("/proc");
     if (dp != nullptr) {
@@ -65,7 +61,7 @@ int linuxUtil::getProcIdByName(std::string procName) {
     return pid;
 }
 
-int linuxUtil::killProcessById(int pid, std::string procName) {
+int linuxUtil::killProcessById(int pid, const std::string &procName) {
     if (pid == -1) {
         throw std::runtime_error(
                 "Nothing to Kill, no Process " + procName + " PID " + std::to_string(pid));
@@ -78,8 +74,6 @@ int linuxUtil::killProcessById(int pid, std::string procName) {
 }
 
 uint64_t linuxUtil::getSysUpTime() {
-    ///proc/uptime
-    /// 325679.29 320697.33
     std::ifstream upTimeFile;
     upTimeFile.open("/proc/uptime");
 
@@ -88,40 +82,38 @@ uint64_t linuxUtil::getSysUpTime() {
     }
 
     uint64_t beforeBootTime;
-    uint64_t SysUptime = 0;
+    uint64_t sysUptime = 0;
     std::string line;
     while (std::getline(upTimeFile, line)) {
-        sscanf(line.c_str(), "%lu %lu", &SysUptime, &beforeBootTime);
+        sscanf(line.c_str(), "%lu %lu", &sysUptime, &beforeBootTime);
     }
     upTimeFile.close();
-    return SysUptime;
+    return sysUptime;
 }
 
 
-bool linuxUtil::setAppAsDaemon() {
-    pid_t pid;
-    pid = fork();
+bool linuxUtil::startAppAsDaemon() {
+    pid_t pid = fork();
     if (pid < 0) {
         return false;
     }
 
-
     if (pid > 0)
-        exit(EXIT_SUCCESS);
+        std::exit(EXIT_SUCCESS);
 
     if (setsid() < 0)
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
 
     //TODO: Implement a working signal handler */
-    signal(SIGCHLD, SIG_IGN);
-    signal(SIGHUP, SIG_IGN);
+    std::signal(SIGCHLD, SIG_IGN);
+    std::signal(SIGHUP, SIG_IGN);
 
     pid = fork();
     if (pid < 0)
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
 
     if (pid > 0)
-        exit(EXIT_SUCCESS);
+        std::exit(EXIT_SUCCESS);
 
     umask(0);
     auto retval = chdir("/test");

@@ -37,7 +37,7 @@ class linuxsysmonitor : public ISubject {
 
 public:
     void setRunB(bool runB);
-    explicit  linuxsysmonitor(const std::chrono::milliseconds &interval, std::string basepath="/proc");
+    explicit  linuxsysmonitor(const std::chrono::milliseconds &interval, const std::string& basepath="/proc");
     linuxmonitoring_data::DataLinuxmonitoring getlinuxSysMonitoringData();
     void Attach(IObserver *observer) override;
     void Detach(IObserver *observer) override;
@@ -45,9 +45,9 @@ public:
 
 private:
     std::list<IObserver *> list_observer_;
-    void init(std::string basepath);
+    void init(const std::string& basepath);
     void run();
-    std::thread *t;
+    std::thread *workerThread;
     std::chrono::milliseconds interval;
     std::atomic<bool> run_b = true;
     linuxmonitoring_data::DataLinuxmonitoring linuxDataModel;

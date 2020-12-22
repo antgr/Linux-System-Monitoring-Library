@@ -39,10 +39,10 @@ include_directories(thirdparty/cxxopts/include)
 include_directories(thirdparty/Catch2/single_include)
 include_directories(thirdparty/json/single_include/nlohmann)
 include_directories(thirdparty/json/single_include)
-include_directories(thirdparty/uSockets/src)
+include_directories(thirdparty/uWebSockets/uSockets/src)
 include_directories(thirdparty/uWebSockets/src)
-link_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/uSockets)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/uSockets)
+link_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/uWebSockets/uSockets)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/uWebSockets/uSockets)
 
 
 

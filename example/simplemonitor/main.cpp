@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
         std::cout << " ]" <<std::endl;
 
          for(auto elem: ethernetMonitoring) {
+             // get available networkdevices with command ifconfig
             if(elem->getDeviceName() == "enxcc483a803ea7") {
                 std::cout << "network load: " << elem->getDeviceName() << " : "
                           << elem->getBitsPerSeceondString(elem->getBytesPerSecond()) << " : "

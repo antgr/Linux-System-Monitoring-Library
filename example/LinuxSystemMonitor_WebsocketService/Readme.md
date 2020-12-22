@@ -13,11 +13,17 @@ This application consists of the following libs:
 * [uSockets - socket lib which uWebsockets built on top](https://github.com/uNetworking/uSockets)
 
 #### Parameter:
-    -c public_cert  "path to public cert"
-    -k private_key  "path to private key"
+    -d debug         "Enable debugging"
+    -c public_cert   "path to public cert"
+    -k private_key   "path to private key"
     -p websocketport_num  "Port to listen on"
-    -i sendInterval  "sendInterval where data sent out
+    -i sendInterval  "sendInterval where data sent out in milliseconds"
+    -b basepath  "Path to access the kernel information" 
     
     
-#### Connect to Websocket Server:
+#### Connect to Websocket Server via websocketclient.html example:
+Enter Websocket URL:       
+    
+    localhost:4002/linuxmonitor
+
 ![websocketCLient](./websocket.png)

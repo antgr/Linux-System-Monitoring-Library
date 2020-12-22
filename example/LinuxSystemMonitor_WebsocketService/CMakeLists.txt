@@ -14,9 +14,12 @@ add_executable(linuxsystemMonitor
 target_link_libraries(linuxsystemMonitor
         linuxmonitoring
         pthread
+        )
+
+
+target_link_libraries(linuxsystemMonitor z)
+target_link_libraries(linuxsystemMonitor ${CMAKE_HOME_DIRECTORY}/thirdparty/uWebSockets/uSockets/uSockets.a)
+target_link_libraries(linuxsystemMonitor
         crypto
         ssl
         )
-
-target_link_libraries(linuxsystemMonitor z)
-target_link_libraries(linuxsystemMonitor ${CMAKE_HOME_DIRECTORY}/thirdparty/uSockets/uSockets.a)
