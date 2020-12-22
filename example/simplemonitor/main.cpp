@@ -5,7 +5,9 @@
 #include "lib/linux_memoryload.hpp"
 #include "lib/linux_cpuload.hpp"
 #include "lib/linux_networkload.hpp"
+#include "lib/util/record_value.hpp"
 #include <thread>
+
 
 std::atomic_bool run;
 
@@ -34,13 +36,29 @@ int main(int argc, char *argv[]) {
     cpuMonitoring->initMultiCore();
 
 
+    //auto recordTest2 = std::make_unique<recordValue<double>>(100);
+    auto recordTest = std::make_unique<recordValue<double>>(std::chrono::hours(1), std::chrono::seconds(1));
+
     while(run) {
-        std::cout   << "memory load: " << memoryMonitoring->getCurrentMemUsageInPercent() << "% maxmemory: "
-                    << memoryMonitoring->getTotalMemoryInKB() << "Kb used: " << memoryMonitoring->getCurrentMemUsageInKB() << "Kb  Memload of this Process "
-                    << memoryMonitoring->getMemoryUsageByThisProcess() << "KB "
+
+        double currentCpuLoad = cpuMonitoring->getCurrentCpuUsage();
+        recordTest->addRecord(currentCpuLoad);
+
+        std::cout << "----------------------------------------------" << std::endl
+                  << " current CPULoad:" << currentCpuLoad << std::endl
+                  << " average CPULoad " << recordTest->getAverageRecord() << std::endl
+                  << " Max     CPULoad " << recordTest->getMaxRecord() << std::endl
+                  << " Min     CPULoad " << recordTest->getMinRecord() << std::endl
+                  << " CPU: " <<   cpuMonitoring->getCPUName() << std::endl;
+
+
+
+
+        std::cout   << " memory load: " << memoryMonitoring->getCurrentMemUsageInPercent() << "% maxmemory: "
+                    << memoryMonitoring->getTotalMemoryInKB() << " Kb used: " << memoryMonitoring->getCurrentMemUsageInKB() << " Kb  Memload of this Process "
+                    << memoryMonitoring->getMemoryUsageByThisProcess() << " KB "
                     <<  std::endl;
-        std::cout << "cpu load: " << cpuMonitoring->getCurrentCpuUsage() << "% of cpu: " << cpuMonitoring->getCPUName() <<  std::endl;
-        std::cout << "mulitcore [ ";
+        std::cout << " mulitcore [ ";
         for(auto cpu: cpuMonitoring->getCurrentMultiCoreUsage()) {
             std::cout << cpu << " % ";
         }
@@ -49,7 +67,7 @@ int main(int argc, char *argv[]) {
          for(auto elem: ethernetMonitoring) {
              // get available networkdevices with command ifconfig
             if(elem->getDeviceName() == "enxcc483a803ea7") {
-                std::cout << "network load: " << elem->getDeviceName() << " : "
+                std::cout << " network load: " << elem->getDeviceName() << " : "
                           << elem->getBitsPerSeceondString(elem->getBytesPerSecond()) << " : "
                           << elem->getBitsPerSeceondString(elem->getRXBytesPerSecond()) << " : "
                           << elem->getBitsPerSeceondString(elem->getTXBytesPerSecond()) << " : "
@@ -59,7 +77,6 @@ int main(int argc, char *argv[]) {
             }
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
-
     }
 
 }
