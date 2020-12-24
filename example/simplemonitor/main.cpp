@@ -6,6 +6,7 @@
 #include "lib/linux_cpuload.hpp"
 #include "lib/linux_networkload.hpp"
 #include "lib/util/record_value.hpp"
+#include "lib/util/timer.hpp"
 #include <thread>
 
 
@@ -21,6 +22,26 @@ static void installHandler() {
     std::signal(SIGTERM, signalHandler);
     std::signal(SIGPIPE, signalHandler);
 }
+
+class testclass: ITimerObserver {
+public:
+    testclass(std::chrono::milliseconds ms, std::string printStr): str(printStr) {
+        this->t = Timer::createTimer();
+        t->Attach(this,continuous, ms);
+    }
+    void runTest() {
+        std::cout << std::chrono::system_clock::now().time_since_epoch().count() / 1000000 << " call runtest: " <<  this->str << std::endl;
+    }
+
+private:
+    void Update() override {
+        this->runTest();
+    }
+    std::string str;
+    std::shared_ptr<Timer> t;
+};
+
+
 
 int main(int argc, char *argv[]) {
 
@@ -39,7 +60,19 @@ int main(int argc, char *argv[]) {
     //auto recordTest2 = std::make_unique<recordValue<double>>(100);
     auto recordTest = std::make_unique<recordValue<double>>(std::chrono::hours(1), std::chrono::seconds(1));
 
+
+    auto testInstance = std::make_shared<testclass>(std::chrono::milliseconds(1000), "1000 ms str");
+    auto testInstance2 = std::make_shared<testclass>(std::chrono::milliseconds(2000), "2000 ms str");
+    auto testInstance3 = std::make_shared<testclass>(std::chrono::milliseconds(3000),"3000 ms str");
+    auto testInstance4 = std::make_shared<testclass>(std::chrono::milliseconds(4000),"4000 ms str");
+    auto testInstance5 = std::make_shared<testclass>(std::chrono::milliseconds(5000),"5000 ms str");
+
+
+
+
+
     while(run) {
+        /*
 
         double currentCpuLoad = cpuMonitoring->getCurrentCpuUsage();
         recordTest->addRecord(currentCpuLoad);
@@ -75,7 +108,7 @@ int main(int argc, char *argv[]) {
                           << " TX Bytes Startup: " << elem->getTXBytesSinceStartup()
                           << std::endl;
             }
-        }
+        }*/
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
