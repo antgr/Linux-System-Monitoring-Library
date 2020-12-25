@@ -12,7 +12,7 @@ class recordValue {
 
 public:
     recordValue(std::chrono::system_clock::duration observTime, std::chrono::system_clock::duration upDateTime): stepSize(
-            static_cast<uint64_t>(observTime / upDateTime)) ,firstTime(true) { this->recordContainer.resize(stepSize); std::cout << "stepsize: " << this->stepSize << std::endl; };
+            static_cast<uint64_t>(observTime / upDateTime)) ,firstTime(true) { this->recordContainer.resize(stepSize); };
     recordValue(uint64_t stepSize_): stepSize(stepSize_),firstTime(true) { this->recordContainer.resize(stepSize); };
     void addRecord(const T &rec) {
         this->recordContainer.push_back(rec);
