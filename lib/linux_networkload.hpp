@@ -30,6 +30,8 @@ public:
     uint64_t getTXBytesSinceStartup();
     static std::string getBytesPerSeceondString(uint64_t bytesPerSecond);
     static std::string getBitsPerSeceondString(uint64_t bytesPerSecond);
+    static std::string getBytesString(uint64_t totalBytes);
+    static std::string getBitsString(uint64_t totalBytes);
     bool isDeviceUp() const;
     std::string getDeviceName();
 
@@ -47,7 +49,6 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> timeBefore_rx;
     std::chrono::time_point<std::chrono::steady_clock> timeBefore_tx;
     uint64_t BytesPerSecond = 0;
-    uint64_t BytesSinceStartup = 0;
     std::chrono::time_point<std::chrono::steady_clock> timeStamp;
 
 };

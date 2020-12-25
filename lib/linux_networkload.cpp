@@ -248,23 +248,47 @@ uint64_t networkLoad::getBytesSinceStartup() {
 }
 
 std::string networkLoad::getBytesPerSeceondString(uint64_t bytesPerSecond) {
-    uint64_t Bytes = bytesPerSecond;
+    return getBytesString(bytesPerSecond) + "/s";
+}
+
+std::string networkLoad::getBitsPerSeceondString(uint64_t bytesPerSecond) {
+    return getBitsString(bytesPerSecond) + "/s";
+}
+
+std::string networkLoad::getBytesString(uint64_t totalBytes) {
+    uint64_t Bytes = totalBytes;
     uint64_t kByte = 0;
     uint64_t mByte = 0;
-    if (Bytes > 1000) {
-        kByte = Bytes / 1000;
-        Bytes %= 1000;
+    uint64_t gByte = 0;
+    if (Bytes > 1024) {
+        kByte = Bytes / 1024;
+        Bytes %= 1024;
     }
-    if (kByte > 1000) {
-        mByte = kByte / 1000;
-        kByte %= 1000;
+    if (kByte > 1024) {
+        mByte = kByte / 1024;
+        kByte %= 1024;
     }
+    if(mByte > 1024) {
+        gByte = mByte / 1024;
+        mByte %=1024;
+    }
+
+    if (gByte > 0) {
+        std::string net;
+        net += std::to_string(gByte);
+        net += ".";
+        net += std::to_string(mByte / 100);
+        net += "gByte";
+        return net;
+    }
+
+
     if (mByte > 0) {
         std::string net;
         net += std::to_string(mByte);
         net += ".";
         net += std::to_string(kByte / 100);
-        net += "mByte/s";
+        net += "mByte";
         return net;
     }
 
@@ -273,37 +297,53 @@ std::string networkLoad::getBytesPerSeceondString(uint64_t bytesPerSecond) {
         net += std::to_string(kByte);
         net += ".";
         net += std::to_string(Bytes / 100);
-        net += "kByte/s";
+        net += "kByte";
         return net;
     }
 
     if (Bytes > 0) {
         std::string net;
         net += std::to_string(Bytes);
-        net += "Byte/s";
+        net += "Byte";
         return net;
     }
     return "undef";
 }
 
-std::string networkLoad::getBitsPerSeceondString(uint64_t bytesPerSecond) {
-    uint64_t Bytes = bytesPerSecond * 8;
+std::string networkLoad::getBitsString(uint64_t totalBytes) {
+    uint64_t Bytes = totalBytes * 8;
     uint64_t kByte = 0;
     uint64_t mByte = 0;
-    if (Bytes > 1000) {
-        kByte = Bytes / 1000;
-        Bytes %= 1000;
+    uint64_t gByte = 0;
+    if (Bytes > 1024) {
+        kByte = Bytes / 1024;
+        Bytes %= 1024;
     }
-    if (kByte > 1000) {
-        mByte = kByte / 1000;
-        kByte %= 1000;
+    if (kByte > 1024) {
+        mByte = kByte / 1024;
+        kByte %= 1024;
     }
+    if(mByte > 1024) {
+        gByte = mByte / 1024;
+        mByte %=1024;
+    }
+
+    if (gByte > 0) {
+        std::string net;
+        net += std::to_string(gByte);
+        net += ".";
+        net += std::to_string(mByte / 100);
+        net += "gBit";
+        return net;
+    }
+
+
     if (mByte > 0) {
         std::string net;
         net += std::to_string(mByte);
         net += ".";
         net += std::to_string(kByte / 100);
-        net += "mBit/s";
+        net += "mBit";
         return net;
     }
 
@@ -312,14 +352,14 @@ std::string networkLoad::getBitsPerSeceondString(uint64_t bytesPerSecond) {
         net += std::to_string(kByte);
         net += ".";
         net += std::to_string(Bytes / 100);
-        net += "kBit/s";
+        net += "kBit";
         return net;
     }
 
     if (Bytes > 0) {
         std::string net;
         net += std::to_string(Bytes);
-        net += "Bit/s";
+        net += "Bit";
         return net;
     }
     return "undef";
