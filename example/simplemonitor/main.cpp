@@ -23,25 +23,6 @@ static void installHandler() {
     std::signal(SIGPIPE, signalHandler);
 }
 
-class testclass: ITimerObserver {
-public:
-    testclass(std::chrono::milliseconds ms, std::string printStr): str(printStr) {
-        this->t = Timer::createTimer();
-        t->Attach(this,continuous, ms);
-    }
-    void runTest() {
-        std::cout << std::chrono::system_clock::now().time_since_epoch().count() / 1000000 << " call runtest: " <<  this->str << std::endl;
-    }
-
-private:
-    void Update() override {
-        this->runTest();
-    }
-    std::string str;
-    std::shared_ptr<Timer> t;
-};
-
-
 
 int main(int argc, char *argv[]) {
 
@@ -57,23 +38,10 @@ int main(int argc, char *argv[]) {
     cpuMonitoring->initMultiCore();
 
 
-    //auto recordTest2 = std::make_unique<recordValue<double>>(100);
     auto recordTest = std::make_unique<recordValue<double>>(std::chrono::hours(1), std::chrono::seconds(1));
 
 
-    auto testInstance = std::make_shared<testclass>(std::chrono::milliseconds(1000), "1000 ms str");
-    auto testInstance2 = std::make_shared<testclass>(std::chrono::milliseconds(2000), "2000 ms str");
-    auto testInstance3 = std::make_shared<testclass>(std::chrono::milliseconds(3000),"3000 ms str");
-    auto testInstance4 = std::make_shared<testclass>(std::chrono::milliseconds(4000),"4000 ms str");
-    auto testInstance5 = std::make_shared<testclass>(std::chrono::milliseconds(5000),"5000 ms str");
-
-
-
-
-
-    while(run) {
-        /*
-
+    Timer::periodicShot([&](){
         double currentCpuLoad = cpuMonitoring->getCurrentCpuUsage();
         recordTest->addRecord(currentCpuLoad);
 
@@ -84,32 +52,35 @@ int main(int argc, char *argv[]) {
                   << " Min     CPULoad " << recordTest->getMinRecord() << std::endl
                   << " CPU: " <<   cpuMonitoring->getCPUName() << std::endl;
 
+    },std::chrono::milliseconds (1003));
 
-
-
+    Timer::periodicShot([&](){
+        std::cout << "----------------------------------------------" << std::endl;
         std::cout   << " memory load: " << memoryMonitoring->getCurrentMemUsageInPercent() << "% maxmemory: "
                     << memoryMonitoring->getTotalMemoryInKB() << " Kb used: " << memoryMonitoring->getCurrentMemUsageInKB() << " Kb  Memload of this Process "
                     << memoryMonitoring->getMemoryUsageByThisProcess() << " KB "
                     <<  std::endl;
-        std::cout << " mulitcore [ ";
-        for(auto cpu: cpuMonitoring->getCurrentMultiCoreUsage()) {
-            std::cout << cpu << " % ";
-        }
-        std::cout << " ]" <<std::endl;
+    }, std::chrono::milliseconds (2009));
 
-         for(auto elem: ethernetMonitoring) {
-             // get available networkdevices with command ifconfig
-            if(elem->getDeviceName() == "enxcc483a803ea7") {
+    Timer::periodicShot([&]() {
+        for(auto elem: ethernetMonitoring) {
+            // get available networkdevices with command ifconfig
+            if(elem->getDeviceName() == "wlp0s20f3") {
+                std::cout << "----------------------------------------------" << std::endl;
                 std::cout << " network load: " << elem->getDeviceName() << " : "
                           << elem->getBitsPerSeceondString(elem->getBytesPerSecond()) << " : "
                           << elem->getBitsPerSeceondString(elem->getRXBytesPerSecond()) << " : "
                           << elem->getBitsPerSeceondString(elem->getTXBytesPerSecond()) << " : "
-                          << " RX Bytes Startup: " << elem->getRXBytesSinceStartup()
-                          << " TX Bytes Startup: " << elem->getTXBytesSinceStartup()
+                          << " RX Bytes Startup: " << elem->getBytesString(elem->getRXBytesSinceStartup())
+                          << " TX Bytes Startup: " << elem->getBytesString(elem->getTXBytesSinceStartup())
                           << std::endl;
             }
-        }*/
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }, std::chrono::milliseconds (5007));
+
+    while(Timer::isRunning()) {
+        std::this_thread::sleep_for(std::chrono::minutes (1));
+        Timer::stop();
     }
 
 }
