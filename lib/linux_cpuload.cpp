@@ -1,3 +1,11 @@
+/**
+ * @author: Daniel Fuchs
+ * @contact: fuxeysolutions@gmail.com
+ *
+ * distributed under the MIT License (MIT).
+ * Copyright (c) Daniel Fuchs
+ *
+ */
 #include "linux_cpuload.hpp"
 #include <stdexcept>
 #include <fstream>

@@ -1,3 +1,11 @@
+/**
+ * @author: Daniel Fuchs
+ * @contact: fuxeysolutions@gmail.com
+ *
+ * distributed under the MIT License (MIT).
+ * Copyright (c) Daniel Fuchs
+ *
+ */
 #include <iostream>
 #include <csignal>
 #include <memory>

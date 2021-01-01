@@ -1,3 +1,11 @@
+/**
+ * @author: Daniel Fuchs
+ * @contact: fuxeysolutions@gmail.com
+ *
+ * distributed under the MIT License (MIT).
+ * Copyright (c) Daniel Fuchs
+ *
+ */
 #include "linux_networkload.hpp"
 #include <string>
 #include <exception>
