@@ -1,4 +1,4 @@
-# Lightweight Linux Monitoring Library
+# Lightweight Linux System Monitoring Library
 
 ### Features:
 
