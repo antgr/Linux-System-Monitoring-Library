@@ -13,7 +13,7 @@
 std::atomic_bool run;
 
 static void signalHandler(int signum) {
-    std::cerr << "Signal " << signum<<  " was catched, shutdown program" << std::endl;
+    std::cerr << "Signal " << signum<<  " was catched, shutdown app" << std::endl;
     run = false;
 }
 
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
 
 
     auto recordTest = std::make_unique<recordValue<double>>(std::chrono::hours(1), std::chrono::seconds(1));
+    auto recordTest2 = std::make_unique<recordValue<double>>(std::chrono::hours(6), std::chrono::minutes(5));
 
 
     Timer::periodicShot([&](){
@@ -54,7 +55,13 @@ int main(int argc, char *argv[]) {
 
     },std::chrono::milliseconds (1003));
 
+    Timer::periodicShot([&]() {
+        recordTest2->addRecord(recordTest->getAverageRecord());
+    }, std::chrono::minutes(5));
+
+
     Timer::periodicShot([&](){
+        std::cout << "----------------------------------------------" ;
         std::cout << "----------------------------------------------" << std::endl;
         std::cout   << " memory load: " << memoryMonitoring->getCurrentMemUsageInPercent() << "% maxmemory: "
                     << memoryMonitoring->getTotalMemoryInKB() << " Kb used: " << memoryMonitoring->getCurrentMemUsageInKB() << " Kb  Memload of this Process "

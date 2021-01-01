@@ -1,7 +1,7 @@
 # Websocket Linuxmonitor
 
-This app consists of a Websocket Server and the linux system monitor. The linux load is read out at an given interval 
-and will be sent out to all connected websockets. 
+This app consists of a Websocket Server and the linux system monitor. The System load is read out at an given interval 
+and will be sent to all connected websockets. 
 The websocket Server as well as the linuxmonitor runs in an own thread. Data between these two threads are transferred via
 observer pattern and mutex lock.
 

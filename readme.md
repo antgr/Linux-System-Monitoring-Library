@@ -1,37 +1,34 @@
 # Lightweight Linux Monitoring Library
-For several Projects on embedded Linux devices and Linux Servers i wanted to monitor the system load so therefore, 
-i created this Library where i can get the CPU Load / Ethernet Load and Memory consumption, to send it via Websocket to 
-a backend application or print it on a LCD display or send the data via MQTT: 
-
-
 
 ### Features:
 
-The library consists of STL and c++17 only, no thirdparty library is used (except for the websocket example and Unittests). 
-
+The library consists of STL and c++17 only! no thirdparty library is used (except for the websocket example and Unittests). 
 
 
 * CPU Usage:
   * total CPU Usage
   * CPU Usage per Core
   * CPU Information
+
     
-* Networkinterface load:
-  * Bytes/Bits per Second
-  * Total Received or Transmitted Bytes
+* Network Interface load:
+  * Bytes/Bits per Second - per Network Device
+  * Total Received or Transmitted Bytes - per Network Device
+
 
 * Memory Usage:
   * System Memory Usage
   * Total Memory
   * Memory Usage per Process
+
   
 * Linux Utils and Features:
   * is remote Device Online - (parse Ping response)
-  * getPID by Name
+  * getPID by Process Name
   * getOSVersion
   * SysUptime
-  * Number of Threads by PID 
-  * setApplication as Deamon
+  * Number of Threads used by PID 
+  * start Application as Daemon
 
 
 ## How to build:
@@ -46,7 +43,7 @@ Clone the project: `git clone git@github.com:fuxey/Lightweight_LinuxSystemMonito
     
 find the library in the folder `lib` of the `build` folder
 
-#### build simple linux load monitor (No thirdpary dependencies): 
+#### build simple linux load monitor (No thirdparty dependencies): 
     mkdir build
     cd build
     cmake ..
@@ -54,13 +51,13 @@ find the library in the folder `lib` of the `build` folder
     
 find the executable in the folder `bin` of the `build` folder
 
-#### build linuxsystem websocket service (thirdpary dependencies needed):
+#### build linuxsystem websocket service (thirdparty dependencies needed):
 
     git submodule update --init --recursive
     mkdir build
     cd build
     cmake ..
-    cmake --build . --target simple_linuxsystemMonitor
+    cmake --build . --target linuxsystemMonitor
     
 find the executable in the folder `bin` of the `build` folder
 
@@ -68,9 +65,9 @@ find the executable in the folder `bin` of the `build` folder
 
 ## Examples:
 
-### Linux Monitoring Websocket Server:
+### Monitoring Websocket Server:
 This app starts a websocket Server which offers the linuxsystem monitor values as a Json object.
-#### Monitorig Data are presented in JSON: 
+#### Monitoring Data are presented in JSON: 
 therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) is used + the very cool [Json to C++](https://app.quicktype.io/) code generator tool. 
     
     {
@@ -151,11 +148,18 @@ therefore the most popular [C++ JSON lib](https://github.com/nlohmann/json) is u
 #### Simple Monitor:
 Main aim of this example, is to show how to interact with the library. The app loops through the results of linux monitor lib and prints out memory load, cpu load, network load as the following print shows :
 
-    memory load: 47.76% maxmemory: 16133756Kb used: 7705056Kb  Memload of this Process 6260KB 
-    cpu load: 50.8292% of cpu: : Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
-    mulitcore [ 52.48 % 48.45 % 47.06 % 51 % 54.46 % 49.5 % 53.92 % 51.49 % 47.52 % 52.48 % 48.45 % 54.37 %  ]
-    network load: wlp0s20f3 : 21.1mBit/s RX Bytes Startup: 37696419 TX Bytes Startup: 1734702657
-    
+#### example print:
+    ----------------------------------------------
+    current CPULoad:5.09119
+    average CPULoad 10.0671
+    Max     CPULoad 10.0822
+    Min     CPULoad 1.74111
+    CPU: : Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
+    ----------------------------------------------
+    network load: wlp0s20f3 : 1.9kBit/s : 920Bit/s : 1.0kBit/s :  RX Bytes Startup: 15.8mByte TX Bytes Startup: 833.5mByte
+    ----------------------------------------------
+    memory load: 28.4% maxmemory: 16133792 Kb used: 4581564 Kb  Memload of this Process 170408 KB
+    ----------------------------------------------
     
 [for detailed Information](./example/simplemonitor/Readme.md)
 
@@ -164,17 +168,16 @@ Main aim of this example, is to show how to interact with the library. The app l
 ## Todo:
 * CPU Usage per Process
 * example -> monitoring and creating graph with grafana
-* example -> avr lcd bridge
 * Testing: more Catch2 tests
-* Data Export in JSON, BSON,MSGPack, XML
-* logging and average of 30min, 2h, 6h, 24h , 2d, 7d. 
+* Data Export in ~~JSON~~, BSON, MSGPack, XML
 * Documentation
+* ~~logging and average of 30min, 2h, 6h, 24h , 2d, 7d.~~ -> record value
 * ~~ethernetparser optimization~~ 
 * ~~memoryparser optimization~~
 
 # Get in Contact: 
-If there are any Bugs or Request for extensions or features, feel free to
-[email me](fuxeysolution@gmail.com).
+If there are any Bugs or Requests for extensions or features, feel free to
+[email me](fuxeysolution@gmail.com) :austria: .
 
 
 #### Used 3rdparty libs(for the examples):
